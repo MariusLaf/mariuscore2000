@@ -13,26 +13,22 @@ const MARKUP = `
     </div>
   </div>
 
-  <!-- SETUP -->
-  <div id="setupScreen" class="card">
-    <p class="lead">Ajoutez les joueurs, dans l'ordre de passage. Premier à exactement 50 points gagne.</p>
-    <div class="player-rows" id="playerRows"></div>
-
-    <button class="primary-btn" id="startBtn">Commencer la partie</button>
-  </div>
-
   <!-- GAME -->
-  <div id="gameScreen" class="hidden">
+  <div id="gameScreen">
     <div class="scoreboard" id="scoreboard"></div>
 
-    <p class="section-label">Une seule quille touchée</p>
-    <div class="quille-grid" id="quilleGrid"></div>
+    <div class="empty hidden" id="emptyState">Ajoute un joueur pour commencer la partie 👇</div>
 
-    <p class="section-label">Plusieurs quilles touchées</p>
-    <div class="multi-grid" id="multiGrid"></div>
+    <div id="throwControls">
+      <p class="section-label">Une seule quille touchée</p>
+      <div class="quille-grid" id="quilleGrid"></div>
 
-    <button class="log-toggle" id="logToggle">▸ Historique des lancers</button>
-    <div class="log" id="log"></div>
+      <p class="section-label">Plusieurs quilles touchées</p>
+      <div class="multi-grid" id="multiGrid"></div>
+
+      <button class="log-toggle" id="logToggle">▸ Historique des lancers</button>
+      <div class="log" id="log"></div>
+    </div>
   </div>
 
   <!-- WINNER -->
@@ -122,8 +118,7 @@ export default function initMolkky(container) {
 
   function freshState() {
     return {
-      phase: 'setup', // setup | playing | won
-      playerNames: ['', ''],
+      phase: 'playing', // playing | won
       players: [],   // {name, score, misses}
       currentIndex: 0,
       winnerIndex: null,
@@ -188,73 +183,10 @@ export default function initMolkky(container) {
     } catch (e) {}
   });
 
-  // ---------- SETUP SCREEN ----------
-  const playerRows = container.querySelector('#playerRows');
-  const startBtn = container.querySelector('#startBtn');
-
-  const addPlayerBtn = document.createElement('button');
-  addPlayerBtn.type = 'button';
-  addPlayerBtn.className = 'player-row-add';
-  addPlayerBtn.textContent = '+ Ajouter un joueur';
-  addPlayerBtn.addEventListener('click', () => {
-    state.playerNames.push('');
-    renderSetup();
-    saveState();
-  });
-
-  function renderSetup() {
-    playerRows.innerHTML = '';
-    state.playerNames.forEach((name, i) => {
-      const row = document.createElement('div');
-      row.className = 'player-row';
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Joueur ' + (i + 1);
-      input.value = name;
-      input.addEventListener('input', (e) => {
-        state.playerNames[i] = e.target.value;
-        updateStartState();
-        saveState();
-      });
-      row.appendChild(input);
-      if (state.playerNames.length > 1) {
-        const del = document.createElement('button');
-        del.className = 'icon-btn';
-        del.textContent = '×';
-        del.setAttribute('aria-label', 'Retirer ce joueur');
-        del.addEventListener('click', () => {
-          state.playerNames.splice(i, 1);
-          renderSetup();
-          saveState();
-        });
-        row.appendChild(del);
-      }
-      playerRows.appendChild(row);
-    });
-    playerRows.appendChild(addPlayerBtn);
-    updateStartState();
-  }
-
-  function updateStartState() {
-    const valid = state.playerNames.filter(n => n.trim().length > 0).length >= 1;
-    startBtn.disabled = !valid;
-  }
-
-  startBtn.addEventListener('click', () => {
-    const names = state.playerNames.map(n => n.trim()).filter(n => n.length > 0);
-    if (names.length === 0) return;
-    state.players = names.map(n => ({ name: n, score: 0, misses: 0 }));
-    state.currentIndex = 0;
-    state.phase = 'playing';
-    state.winnerIndex = null;
-    state.log = [];
-    history = [];
-    saveState();
-    render();
-  });
-
   // ---------- GAME SCREEN ----------
   const scoreboard = container.querySelector('#scoreboard');
+  const emptyState = container.querySelector('#emptyState');
+  const throwControls = container.querySelector('#throwControls');
   const quilleGrid = container.querySelector('#quilleGrid');
   const multiGrid = container.querySelector('#multiGrid');
   const undoBtn = container.querySelector('#undoBtn');
@@ -423,7 +355,26 @@ export default function initMolkky(container) {
 
   function nextIndex(fromIndex) {
     const n = state.players.length;
+    if (n === 0) return 0;
     return (fromIndex + 1) % n;
+  }
+
+  function addPlayer() {
+    pushHistory();
+    state.players.push({ name: 'Joueur ' + (state.players.length + 1), score: 0, misses: 0 });
+    editingPlayerIndex = state.players.length - 1; // straight into rename mode: named in the tile
+    saveState();
+    render();
+  }
+
+  function removePlayer(index) {
+    pushHistory();
+    state.players.splice(index, 1);
+    if (index < state.currentIndex) state.currentIndex -= 1;
+    if (state.currentIndex >= state.players.length) state.currentIndex = 0;
+    if (state.currentIndex < 0) state.currentIndex = 0;
+    saveState();
+    render();
   }
 
   function reorderPlayers(fromIndex, toIndex) {
@@ -482,7 +433,7 @@ export default function initMolkky(container) {
   }
 
   function applyThrow(label, points) {
-    if (state.phase !== 'playing') return;
+    if (state.phase !== 'playing' || state.players.length === 0) return;
     pushHistory();
 
     const player = state.players[state.currentIndex];
@@ -553,7 +504,6 @@ export default function initMolkky(container) {
   }
 
   function render() {
-    container.querySelector('#setupScreen').classList.toggle('hidden', state.phase !== 'setup');
     container.querySelector('#gameScreen').classList.toggle('hidden', state.phase !== 'playing');
     container.querySelector('#winnerScreen').classList.toggle('hidden', state.phase !== 'won');
 
@@ -563,10 +513,6 @@ export default function initMolkky(container) {
     rematchBtn.classList.toggle('hidden', !showHeaderActions);
     newGameBtn.classList.toggle('hidden', !showHeaderActions);
 
-    if (state.phase === 'setup') {
-      renderSetup();
-      return;
-    }
     if (state.phase === 'won') {
       const w = state.players[state.winnerIndex];
       winnerName.textContent = w ? w.name : '—';
@@ -574,10 +520,23 @@ export default function initMolkky(container) {
     }
 
     // playing
+    emptyState.classList.toggle('hidden', state.players.length > 0);
+    throwControls.classList.toggle('hidden', state.players.length === 0);
+
     scoreboard.innerHTML = '';
     state.players.forEach((p, i) => {
       const chip = document.createElement('div');
       chip.className = 'chip' + (i === state.currentIndex ? ' active' : '');
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'chip-remove';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Retirer ce joueur';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePlayer(i);
+      });
+      chip.appendChild(removeBtn);
 
       if (editingPlayerIndex === i) {
         const input = document.createElement('input');
@@ -637,6 +596,14 @@ export default function initMolkky(container) {
 
       scoreboard.appendChild(chip);
     });
+
+    const addChip = document.createElement('button');
+    addChip.type = 'button';
+    addChip.className = 'chip chip-add';
+    addChip.title = 'Ajouter un joueur';
+    addChip.innerHTML = '<span class="chip-add-icon">+</span><span class="chip-add-label">Joueur</span>';
+    addChip.addEventListener('click', addPlayer);
+    scoreboard.appendChild(addChip);
 
     undoBtn.style.opacity = history.length === 0 ? '0.5' : '1';
 
