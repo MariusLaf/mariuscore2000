@@ -437,8 +437,11 @@ export default function initMolkky(container) {
   }
 
   // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
+  // Pointer capture must be set on the SAME element the move/up listeners are attached to
+  // (the handle), otherwise events get redirected to the captured element and never reach them.
   function onChipDragStart(e, index) {
     e.preventDefault();
+    const handle = e.currentTarget;
     const chip = scoreboard.children[index];
     if (!chip) return;
     const rect = chip.getBoundingClientRect();
@@ -453,7 +456,7 @@ export default function initMolkky(container) {
       pointerId: e.pointerId
     };
     chip.classList.add('dragging');
-    chip.setPointerCapture(e.pointerId);
+    handle.setPointerCapture(e.pointerId);
   }
 
   function onChipDragMove(e) {

@@ -111,7 +111,7 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 8px 12px 4px;
-  min-width: 84px;
+  min-width: 92px;
   text-align: center;
   touch-action: pan-x;
 }
@@ -173,17 +173,23 @@
   color: var(--ivory);
   margin: 0;
 }
-.game-le5000 .chip-miss-dots{ display:flex; gap:3px; justify-content:center; margin-top:5px; }
-.game-le5000 .chip-miss-dot{ width:5px; height:5px; border-radius:50%; background: var(--line); }
-.game-le5000 .chip-miss-dot.filled{ background: #e6a49e; }
+.game-le5000 .chip-quequettes{
+  font-size: 10px;
+  color: var(--cream);
+  opacity: 0.45;
+  margin: 3px 0 0;
+  white-space: nowrap;
+}
+.game-le5000 .chip-quequettes.has-some{ color: #e6a49e; opacity: 0.9; }
 .game-le5000 .chip-drag{
   display:block;
   margin: 4px auto 0;
-  width: 28px;
+  width: 36px;
   cursor: grab;
   touch-action: none;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1;
+  padding: 6px 0;
   opacity: 0.35;
   color: var(--cream);
 }
@@ -195,6 +201,25 @@
   color: var(--cream);
   opacity: 0.6;
   margin: 0 0 8px 2px;
+}
+
+.game-le5000 .pending-block{
+  text-align: center;
+  margin: 4px 0 16px;
+}
+.game-le5000 .pending-value{
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  font-size: 2.8rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.game-le5000 .pending-label{
+  font-size: 0.75rem;
+  opacity: 0.55;
+  margin-top: 2px;
 }
 
 .game-le5000 .tile-grid{
@@ -218,48 +243,12 @@
 }
 .game-le5000 .tile-btn:active{ transform: scale(0.93); background: rgba(217,164,65,0.28); }
 
-.game-le5000 .tile-grid-secondary{
-  grid-template-columns: repeat(2, 1fr);
-  margin-bottom: 14px;
-}
 .game-le5000 .tile-btn-minor{
-  aspect-ratio: auto;
-  padding: 12px 4px;
   background: rgba(255,255,255,0.05);
   border-color: var(--line);
   color: var(--cream);
-  font-weight: 600;
-  font-size: 0.85rem;
 }
 .game-le5000 .tile-btn-minor:active{ background: rgba(255,255,255,0.12); }
-
-.game-le5000 .custom-row{
-  display:flex;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-.game-le5000 .custom-row input{
-  flex:1;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--line);
-  color: var(--cream);
-  border-radius: 10px;
-  padding: 9px 10px;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  min-width: 0;
-}
-.game-le5000 .custom-row button{
-  background: rgba(217,164,65,0.15);
-  border: 1px solid var(--gold-dim);
-  color: var(--gold);
-  border-radius: 10px;
-  padding: 9px 14px;
-  font-family: inherit;
-  font-weight:600;
-  font-size: 0.82rem;
-}
 
 .game-le5000 .streak-note{
   text-align:center;
@@ -300,31 +289,21 @@
 }
 .game-le5000 .btn-validate:not(:disabled):active{ background: var(--felt-700); }
 
-.game-le5000 .add-player{
-  display:flex;
-  gap: 8px;
-  margin: 0 4px 20px;
-}
-.game-le5000 .add-player input{
-  flex:1;
-  background: rgba(255,255,255,0.05);
+.game-le5000 .add-player-btn{
+  display: block;
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 12px;
+  border-radius: 12px;
   border: 1px dashed var(--line);
-  color: var(--cream);
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-family: inherit;
-  font-size: 0.9rem;
-}
-.game-le5000 .add-player button{
   background: transparent;
-  border: 1px solid var(--gold-dim);
-  color: var(--gold);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-weight: 600;
+  color: var(--cream);
+  opacity: 0.75;
   font-family: inherit;
-  white-space: nowrap;
+  font-size: 14.5px;
+  cursor: pointer;
 }
+.game-le5000 .add-player-btn:active{ background: rgba(255,255,255,0.05); }
 
 .game-le5000 .log-toggle{
   width: 100%;

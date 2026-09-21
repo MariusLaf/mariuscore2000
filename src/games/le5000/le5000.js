@@ -15,10 +15,7 @@ const MARKUP = `
 
   <div class="scoreboard" id="scoreboard"></div>
 
-  <div class="add-player">
-    <input id="newPlayerName" type="text" placeholder="Nom du joueur" maxlength="20">
-    <button id="addPlayerBtn">+ Ajouter</button>
-  </div>
+  <button class="add-player-btn" id="addPlayerBtn">+ Ajouter un joueur</button>
 
   <div id="turnZone"></div>
 
@@ -29,7 +26,7 @@ const MARKUP = `
 <div id="rulesOverlay" class="modal-overlay hidden">
   <div class="modal-card">
     <h3 class="modal-title">Règles du compteur</h3>
-    <p class="modal-message">On joue joueur après joueur : ajoute les points du tour par paliers de 100, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro. Glisse une tuile de joueur par sa poignée (⠿) pour changer l'ordre de passage.</p>
+    <p class="modal-message">On joue joueur après joueur : ajoute les points du tour, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro. Glisse une tuile de joueur par sa poignée (⠿) pour changer l'ordre de passage.</p>
     <button class="modal-ok" id="rulesClose">Fermer</button>
   </div>
 </div>
@@ -146,11 +143,11 @@ export default function initLe5000(container) {
     state.pending = 0;
   }
 
-  function addPlayer(name){
-    const trimmed = (name || '').trim();
-    if(!trimmed) return;
+  function addPlayer(){
     pushHistorySnapshot();
-    state.players.push({ id: uid(), name: trimmed, score: 0, streak: 0, turns: 0, started: false, quequettes: 0 });
+    const player = { id: uid(), name: 'Joueur ' + (state.players.length + 1), score: 0, streak: 0, turns: 0, started: false, quequettes: 0 };
+    state.players.push(player);
+    editingPlayerId = player.id; // straight into rename mode: the player is named in the tile
     saveState();
     render();
   }
@@ -197,12 +194,6 @@ export default function initLe5000(container) {
 
   function adjustPending(amount){
     state.pending = Math.max(0, round100(state.pending + amount));
-    saveState();
-    render();
-  }
-
-  function clearPending(){
-    state.pending = 0;
     saveState();
     render();
   }
@@ -272,11 +263,14 @@ export default function initLe5000(container) {
     });
   }
 
-  const QUICK_VALUES = [100, 200, 300, 400, 500, 600, 700, 800];
+  const QUICK_VALUES = [100, 200, 500];
 
   // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
+  // Pointer capture must be set on the SAME element the move/up listeners are attached to
+  // (the handle), otherwise events get redirected to the captured element and never reach them.
   function onChipDragStart(e, index){
     e.preventDefault();
+    const handle = e.currentTarget;
     const chip = scoreboard.children[index];
     if(!chip) return;
     const rect = chip.getBoundingClientRect();
@@ -291,7 +285,7 @@ export default function initLe5000(container) {
       pointerId: e.pointerId
     };
     chip.classList.add('dragging');
-    chip.setPointerCapture(e.pointerId);
+    handle.setPointerCapture(e.pointerId);
   }
 
   function onChipDragMove(e){
@@ -322,9 +316,7 @@ export default function initLe5000(container) {
           ? `<input type="text" class="chip-name-input" data-editing="${p.id}" value="${escapeAttr(p.name)}" maxlength="20">`
           : `<p class="chip-name" data-rename="${p.id}" title="Toucher pour renommer">${escapeAttr(p.name)}</p>`}
         <p class="chip-score">${formatScore(p.score)}</p>
-        <div class="chip-miss-dots">
-          ${[0, 1, 2].map(d => `<span class="chip-miss-dot${d < (p.streak % 3) ? ' filled' : ''}"></span>`).join('')}
-        </div>
+        <p class="chip-quequettes${p.quequettes > 0 ? ' has-some' : ''}">${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</p>
         <span class="chip-drag" data-drag="${i}" title="Glisser pour réordonner">⠿</span>
       </div>
     `).join('');
@@ -369,7 +361,7 @@ export default function initLe5000(container) {
   function renderTurnZone(){
     const p = currentPlayer();
     if(!p){
-      turnZone.innerHTML = '<div class="empty">Ajoute des joueurs pour commencer la partie 👇</div>';
+      turnZone.innerHTML = '<div class="empty">Ajoute un joueur pour commencer la partie 👇</div>';
       return;
     }
     let streakNote = '';
@@ -381,18 +373,14 @@ export default function initLe5000(container) {
       streakNote = `⚠ ${p.streak} coup${p.streak>1?'s':''} à vide d'affilée${p.streak % 3 === 2 ? ' — attention, pénalité au prochain !' : ''}`;
     }
     turnZone.innerHTML = `
-      <p class="section-label">Ajouter des points${state.pending > 0 ? ' · +' + state.pending + ' ce tour' : ''}</p>
-      <div class="tile-grid">
-        ${QUICK_VALUES.map(v => `<button class="tile-btn" data-quick="${v}">+${v}</button>`).join('')}
-      </div>
-      <div class="tile-grid tile-grid-secondary">
-        <button class="tile-btn tile-btn-minor" id="minus100Btn">−100</button>
-        <button class="tile-btn tile-btn-minor" id="clearPendingBtn">Effacer</button>
+      <div class="pending-block">
+        <div class="pending-value">${state.pending > 0 ? '+' + state.pending : '0'}</div>
+        <div class="pending-label">point${state.pending > 1 ? 's' : ''} ce tour</div>
       </div>
 
-      <div class="custom-row">
-        <input type="number" inputmode="numeric" placeholder="Montant libre (x100)" id="customInput">
-        <button id="customAddBtn">Ajouter</button>
+      <div class="tile-grid">
+        ${QUICK_VALUES.map(v => `<button class="tile-btn" data-quick="${v}">+${v}</button>`).join('')}
+        <button class="tile-btn tile-btn-minor" id="minus100Btn">−100</button>
       </div>
 
       <div class="streak-note">${streakNote}</div>
@@ -404,22 +392,10 @@ export default function initLe5000(container) {
     `;
 
     container.querySelector('#minus100Btn').onclick = () => adjustPending(-100);
-    container.querySelector('#clearPendingBtn').onclick = clearPending;
     container.querySelector('#bustBtn').onclick = bustTurn;
     container.querySelector('#validateBtn').onclick = validateTurn;
     turnZone.querySelectorAll('[data-quick]').forEach(btn => {
       btn.onclick = () => adjustPending(parseInt(btn.getAttribute('data-quick'), 10));
-    });
-    container.querySelector('#customAddBtn').onclick = () => {
-      const input = container.querySelector('#customInput');
-      const raw = parseInt(input.value, 10);
-      if(!isNaN(raw) && raw !== 0){
-        adjustPending(round100(raw));
-        input.value = '';
-      }
-    };
-    container.querySelector('#customInput').addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') container.querySelector('#customAddBtn').click();
     });
   }
 
@@ -445,15 +421,7 @@ export default function initLe5000(container) {
     }
   }
 
-  container.querySelector('#addPlayerBtn').onclick = () => {
-    const input = container.querySelector('#newPlayerName');
-    addPlayer(input.value);
-    input.value = '';
-    input.focus();
-  };
-  container.querySelector('#newPlayerName').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') container.querySelector('#addPlayerBtn').click();
-  });
+  container.querySelector('#addPlayerBtn').onclick = addPlayer;
   container.querySelector('#resetBtn').onclick = resetGame;
   container.querySelector('#resetAllBtn').onclick = resetAll;
   container.querySelector('#undoBtn').onclick = undo;
