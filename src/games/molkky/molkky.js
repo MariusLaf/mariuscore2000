@@ -119,6 +119,7 @@ export default function initMolkky(container) {
   let state = loadState() || freshState();
   let history = []; // stack of state snapshots for undo
   let editingPlayerIndex = null; // index of the chip currently being renamed
+  let dragState = null; // in-progress chip drag (reorder)
 
   function freshState() {
     return {
@@ -422,6 +423,58 @@ export default function initMolkky(container) {
     return (fromIndex + 1) % n;
   }
 
+  function reorderPlayers(fromIndex, toIndex) {
+    if (fromIndex === toIndex) return;
+    if (fromIndex < 0 || fromIndex >= state.players.length) return;
+    toIndex = Math.max(0, Math.min(state.players.length - 1, toIndex));
+    pushHistory();
+    const currentPlayerRef = state.players[state.currentIndex];
+    const [moved] = state.players.splice(fromIndex, 1);
+    state.players.splice(toIndex, 0, moved);
+    state.currentIndex = state.players.indexOf(currentPlayerRef);
+    saveState();
+    render();
+  }
+
+  // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
+  function onChipDragStart(e, index) {
+    e.preventDefault();
+    const chip = scoreboard.children[index];
+    if (!chip) return;
+    const rect = chip.getBoundingClientRect();
+    const styles = getComputedStyle(scoreboard);
+    const gap = parseFloat(styles.columnGap || styles.gap || '8') || 8;
+    dragState = {
+      startIndex: index,
+      currentIndex: index,
+      startX: e.clientX,
+      chipWidth: rect.width + gap,
+      chip,
+      pointerId: e.pointerId
+    };
+    chip.classList.add('dragging');
+    chip.setPointerCapture(e.pointerId);
+  }
+
+  function onChipDragMove(e) {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    const dx = e.clientX - dragState.startX;
+    dragState.chip.style.transform = `translateX(${dx}px)`;
+    const shift = Math.round(dx / dragState.chipWidth);
+    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
+  }
+
+  function onChipDragEnd(e) {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    dragState.chip.classList.remove('dragging');
+    dragState.chip.style.transform = '';
+    const { startIndex, currentIndex } = dragState;
+    dragState = null;
+    if (currentIndex !== startIndex) {
+      reorderPlayers(startIndex, currentIndex);
+    }
+  }
+
   function applyThrow(label, points) {
     if (state.phase !== 'playing') return;
     pushHistory();
@@ -565,6 +618,17 @@ export default function initMolkky(container) {
         chipDots.appendChild(dot);
       }
       chip.appendChild(chipDots);
+
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'chip-drag';
+      dragHandle.title = 'Glisser pour réordonner';
+      dragHandle.textContent = '⠿';
+      dragHandle.addEventListener('pointerdown', (e) => onChipDragStart(e, i));
+      dragHandle.addEventListener('pointermove', onChipDragMove);
+      dragHandle.addEventListener('pointerup', onChipDragEnd);
+      dragHandle.addEventListener('pointercancel', onChipDragEnd);
+      chip.appendChild(dragHandle);
+
       scoreboard.appendChild(chip);
     });
 

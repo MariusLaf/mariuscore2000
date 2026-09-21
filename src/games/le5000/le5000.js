@@ -4,6 +4,7 @@ const MARKUP = `
     <h1>Le 5000<span class="dot">.</span></h1>
     <div class="header-actions">
       <span class="round-chip" id="roundChip">Manche 1</span>
+      <button class="icon-btn-sm" id="rulesBtn" title="Règles du compteur">ℹ️</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler le dernier tour">↩︎</button>
       <button class="icon-btn-sm" id="resetBtn" title="Nouvelle partie">🔄</button>
       <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🗑</button>
@@ -12,30 +13,28 @@ const MARKUP = `
 
   <div id="winnerZone"></div>
 
-  <div id="turnZone"></div>
-
-  <div class="leaderboard" id="leaderboardZone" style="display:none;">
-    <h2>Classement</h2>
-    <div id="lbList"></div>
-  </div>
+  <div class="scoreboard" id="scoreboard"></div>
 
   <div class="add-player">
     <input id="newPlayerName" type="text" placeholder="Nom du joueur" maxlength="20">
     <button id="addPlayerBtn">+ Ajouter</button>
   </div>
 
-  <details class="collapsible">
-    <summary>ℹ️ Règles du compteur</summary>
-    <div class="rules-note">On joue joueur après joueur : ajoute les points du tour par paliers de 100, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro. Glisse une ligne du classement par sa poignée (⠿) pour changer l'ordre de passage.</div>
-  </details>
+  <div id="turnZone"></div>
 
-  <details class="collapsible" id="logSection" style="display:none;">
-    <summary>📜 Historique</summary>
-    <div id="logList"></div>
-  </details>
-
-  <div id="modalZone"></div>
+  <button class="log-toggle" id="logToggle">▸ Historique</button>
+  <div class="log" id="log"></div>
 </div>
+
+<div id="rulesOverlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 class="modal-title">Règles du compteur</h3>
+    <p class="modal-message">On joue joueur après joueur : ajoute les points du tour par paliers de 100, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro. Glisse une tuile de joueur par sa poignée (⠿) pour changer l'ordre de passage.</p>
+    <button class="modal-ok" id="rulesClose">Fermer</button>
+  </div>
+</div>
+
+<div id="modalZone"></div>
 `;
 
 export default function initLe5000(container) {
@@ -63,15 +62,22 @@ export default function initLe5000(container) {
   if(typeof state.round !== 'number') state.round = 1;
   if(typeof state.pending !== 'number') state.pending = 0;
   state.pending = Math.max(0, Math.round(state.pending / 100) * 100);
-  state.players.forEach(p => { if(typeof p.started !== 'boolean') p.started = p.score > 0; if(typeof p.quequettes !== 'number') p.quequettes = 0; });
+  state.players.forEach(p => { if(typeof p.started !== 'boolean') p.started = p.score > 0; if(typeof p.quequettes !== 'number') p.quequettes = 0; if(typeof p.streak !== 'number') p.streak = 0; });
 
+  let editingPlayerId = null; // id of the chip currently being renamed
+  let dragState = null; // in-progress chip drag (reorder)
+
+  const scoreboard = container.querySelector('#scoreboard');
   const turnZone = container.querySelector('#turnZone');
   const winnerZoneEl = container.querySelector('#winnerZone');
-  const leaderboardZone = container.querySelector('#leaderboardZone');
-  const lbList = container.querySelector('#lbList');
-  const logSection = container.querySelector('#logSection');
-  const logList = container.querySelector('#logList');
+  const logEl = container.querySelector('#log');
   const roundChip = container.querySelector('#roundChip');
+  const rulesBtn = container.querySelector('#rulesBtn');
+  const rulesOverlay = container.querySelector('#rulesOverlay');
+  const rulesClose = container.querySelector('#rulesClose');
+
+  rulesBtn.addEventListener('click', () => rulesOverlay.classList.remove('hidden'));
+  rulesClose.addEventListener('click', () => rulesOverlay.classList.add('hidden'));
 
   function showConfirm(message, onConfirm){
     const modalZone = container.querySelector('#modalZone');
@@ -101,9 +107,7 @@ export default function initLe5000(container) {
   function formatScore(n){
     return n.toLocaleString('fr-CH');
   }
-  function initials(name){
-    return name.trim().slice(0,2).toUpperCase();
-  }
+  function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
   function pushHistorySnapshot(){
     state.history = state.history || [];
@@ -194,13 +198,13 @@ export default function initLe5000(container) {
   function adjustPending(amount){
     state.pending = Math.max(0, round100(state.pending + amount));
     saveState();
-    renderTurnOnly();
+    render();
   }
 
   function clearPending(){
     state.pending = 0;
     saveState();
-    renderTurnOnly();
+    render();
   }
 
   function validateTurn(){
@@ -270,9 +274,99 @@ export default function initLe5000(container) {
 
   const QUICK_VALUES = [100, 200, 300, 400, 500, 600, 700, 800];
 
-  function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+  // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
+  function onChipDragStart(e, index){
+    e.preventDefault();
+    const chip = scoreboard.children[index];
+    if(!chip) return;
+    const rect = chip.getBoundingClientRect();
+    const styles = getComputedStyle(scoreboard);
+    const gap = parseFloat(styles.columnGap || styles.gap || '8') || 8;
+    dragState = {
+      startIndex: index,
+      currentIndex: index,
+      startX: e.clientX,
+      chipWidth: rect.width + gap,
+      chip,
+      pointerId: e.pointerId
+    };
+    chip.classList.add('dragging');
+    chip.setPointerCapture(e.pointerId);
+  }
 
-  function renderTurnOnly(){
+  function onChipDragMove(e){
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    const dx = e.clientX - dragState.startX;
+    dragState.chip.style.transform = `translateX(${dx}px)`;
+    const shift = Math.round(dx / dragState.chipWidth);
+    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
+  }
+
+  function onChipDragEnd(e){
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    dragState.chip.classList.remove('dragging');
+    dragState.chip.style.transform = '';
+    const { startIndex, currentIndex } = dragState;
+    dragState = null;
+    if(currentIndex !== startIndex){
+      reorderPlayers(startIndex, currentIndex);
+    }
+  }
+
+  function renderScoreboard(){
+    scoreboard.classList.toggle('hidden', state.players.length === 0);
+    scoreboard.innerHTML = state.players.map((p, i) => `
+      <div class="chip ${i === state.currentIndex ? 'active' : ''}">
+        <button class="chip-remove" data-remove="${p.id}" title="Retirer ce joueur">×</button>
+        ${editingPlayerId === p.id
+          ? `<input type="text" class="chip-name-input" data-editing="${p.id}" value="${escapeAttr(p.name)}" maxlength="20">`
+          : `<p class="chip-name" data-rename="${p.id}" title="Toucher pour renommer">${escapeAttr(p.name)}</p>`}
+        <p class="chip-score">${formatScore(p.score)}</p>
+        <div class="chip-miss-dots">
+          ${[0, 1, 2].map(d => `<span class="chip-miss-dot${d < (p.streak % 3) ? ' filled' : ''}"></span>`).join('')}
+        </div>
+        <span class="chip-drag" data-drag="${i}" title="Glisser pour réordonner">⠿</span>
+      </div>
+    `).join('');
+
+    scoreboard.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePlayer(btn.getAttribute('data-remove'));
+      });
+    });
+    scoreboard.querySelectorAll('[data-rename]').forEach(el => {
+      el.addEventListener('click', () => {
+        editingPlayerId = el.getAttribute('data-rename');
+        render();
+      });
+    });
+    scoreboard.querySelectorAll('[data-editing]').forEach(input => {
+      const id = input.getAttribute('data-editing');
+      const commit = () => {
+        const trimmed = input.value.trim();
+        if(trimmed) renamePlayer(id, trimmed);
+        editingPlayerId = null;
+        render();
+      };
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') input.blur();
+        if(e.key === 'Escape'){ editingPlayerId = null; render(); }
+      });
+      input.addEventListener('click', (e) => e.stopPropagation());
+      setTimeout(() => { input.focus(); input.select(); }, 0);
+    });
+    scoreboard.querySelectorAll('[data-drag]').forEach(handle => {
+      const index = parseInt(handle.getAttribute('data-drag'), 10);
+      handle.addEventListener('pointerdown', (e) => onChipDragStart(e, index));
+      handle.addEventListener('pointermove', onChipDragMove);
+      handle.addEventListener('pointerup', onChipDragEnd);
+      handle.addEventListener('pointercancel', onChipDragEnd);
+    });
+  }
+
+  function renderTurnZone(){
     const p = currentPlayer();
     if(!p){
       turnZone.innerHTML = '<div class="empty">Ajoute des joueurs pour commencer la partie 👇</div>';
@@ -287,31 +381,25 @@ export default function initLe5000(container) {
       streakNote = `⚠ ${p.streak} coup${p.streak>1?'s':''} à vide d'affilée${p.streak % 3 === 2 ? ' — attention, pénalité au prochain !' : ''}`;
     }
     turnZone.innerHTML = `
-      <div class="turn-card">
-        <div class="turn-label">Au tour de</div>
-        <div class="turn-name">${escapeAttr(p.name)}</div>
-        <div class="turn-total">Total actuel : ${formatScore(p.score)} pts${state.pending > 0 ? ' · +' + state.pending + ' ce tour' : ''} · ${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</div>
+      <p class="section-label">Ajouter des points${state.pending > 0 ? ' · +' + state.pending + ' ce tour' : ''}</p>
+      <div class="tile-grid">
+        ${QUICK_VALUES.map(v => `<button class="tile-btn" data-quick="${v}">+${v}</button>`).join('')}
+      </div>
+      <div class="tile-grid tile-grid-secondary">
+        <button class="tile-btn tile-btn-minor" id="minus100Btn">−100</button>
+        <button class="tile-btn tile-btn-minor" id="clearPendingBtn">Effacer</button>
+      </div>
 
-        <p class="section-label">Ajouter des points</p>
-        <div class="tile-grid">
-          ${QUICK_VALUES.map(v => `<button class="tile-btn" data-quick="${v}">+${v}</button>`).join('')}
-        </div>
-        <div class="tile-grid tile-grid-secondary">
-          <button class="tile-btn tile-btn-minor" id="minus100Btn">−100</button>
-          <button class="tile-btn tile-btn-minor" id="clearPendingBtn">Effacer</button>
-        </div>
+      <div class="custom-row">
+        <input type="number" inputmode="numeric" placeholder="Montant libre (x100)" id="customInput">
+        <button id="customAddBtn">Ajouter</button>
+      </div>
 
-        <div class="custom-row">
-          <input type="number" inputmode="numeric" placeholder="Montant libre (x100)" id="customInput">
-          <button id="customAddBtn">Ajouter</button>
-        </div>
+      <div class="streak-note">${streakNote}</div>
 
-        <div class="streak-note">${streakNote}</div>
-
-        <div class="main-actions">
-          <button class="btn btn-bust" id="bustBtn">Quequette (0 pt)</button>
-          <button class="btn btn-validate" id="validateBtn" ${state.pending <= 0 ? 'disabled' : ''}>Valider le tour</button>
-        </div>
+      <div class="main-actions">
+        <button class="btn btn-bust" id="bustBtn">Quequette (0 pt)</button>
+        <button class="btn btn-validate" id="validateBtn" ${state.pending <= 0 ? 'disabled' : ''}>Valider le tour</button>
       </div>
     `;
 
@@ -335,82 +423,6 @@ export default function initLe5000(container) {
     });
   }
 
-  // ---------- Drag-to-reorder (pointer events: works with mouse and touch) ----------
-  let dragState = null;
-
-  function onDragPointerDown(e, index){
-    e.preventDefault();
-    const row = lbList.children[index];
-    if(!row) return;
-    const rect = row.getBoundingClientRect();
-    const styles = getComputedStyle(lbList);
-    const gap = parseFloat(styles.rowGap || styles.gap || '6') || 6;
-    dragState = {
-      startIndex: index,
-      currentIndex: index,
-      startY: e.clientY,
-      rowHeight: rect.height + gap,
-      row,
-      pointerId: e.pointerId
-    };
-    row.classList.add('dragging');
-    row.setPointerCapture(e.pointerId);
-  }
-
-  function onDragPointerMove(e){
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    const dy = e.clientY - dragState.startY;
-    dragState.row.style.transform = `translateY(${dy}px)`;
-    const shift = Math.round(dy / dragState.rowHeight);
-    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
-  }
-
-  function onDragPointerUp(e){
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    dragState.row.classList.remove('dragging');
-    dragState.row.style.transform = '';
-    const { startIndex, currentIndex } = dragState;
-    dragState = null;
-    if(currentIndex !== startIndex){
-      reorderPlayers(startIndex, currentIndex);
-    }
-  }
-
-  function renderLeaderboard(){
-    if(state.players.length === 0){
-      leaderboardZone.style.display = 'none';
-      return;
-    }
-    leaderboardZone.style.display = 'block';
-    lbList.innerHTML = state.players.map((p, i) => `
-      <div class="lb-row ${i === state.currentIndex ? 'is-current' : ''}" data-index="${i}">
-        <span class="lb-drag" title="Glisser pour réordonner">⠿</span>
-        <div class="lb-avatar">${escapeAttr(initials(p.name))}</div>
-        <div class="lb-name-wrap">
-          <input class="lb-name" data-id="${p.id}" value="${escapeAttr(p.name)}" maxlength="20">
-          <div class="lb-sub">${p.turns} tour${p.turns>1?'s':''} · ${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}${!p.started ? ' · pas encore en jeu' : ''}${i === state.currentIndex ? ' · à jouer' : ''}</div>
-        </div>
-        <div class="lb-score">${formatScore(p.score)}</div>
-        <button class="lb-remove" data-remove="${p.id}">✕</button>
-      </div>
-    `).join('');
-
-    lbList.querySelectorAll('.lb-name').forEach(input => {
-      input.onchange = () => renamePlayer(input.getAttribute('data-id'), input.value);
-    });
-    lbList.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.onclick = () => removePlayer(btn.getAttribute('data-remove'));
-    });
-    lbList.querySelectorAll('.lb-drag').forEach(handle => {
-      const row = handle.closest('.lb-row');
-      const index = parseInt(row.getAttribute('data-index'), 10);
-      handle.addEventListener('pointerdown', (e) => onDragPointerDown(e, index));
-      handle.addEventListener('pointermove', onDragPointerMove);
-      handle.addEventListener('pointerup', onDragPointerUp);
-      handle.addEventListener('pointercancel', onDragPointerUp);
-    });
-  }
-
   function render(){
     const winner = state.players.find(p => p.score >= 5000);
     winnerZoneEl.innerHTML = winner
@@ -419,18 +431,17 @@ export default function initLe5000(container) {
 
     roundChip.textContent = 'Manche ' + state.round;
 
-    renderTurnOnly();
-    renderLeaderboard();
+    renderScoreboard();
+    renderTurnZone();
 
     if(state.log && state.log.length > 0){
-      logSection.style.display = 'block';
-      logList.innerHTML = state.log.slice(0, 12).map(entry => {
+      logEl.innerHTML = state.log.slice(0, 12).map(entry => {
         const deltaClass = entry.delta > 0 ? 'plus' : (entry.delta < 0 ? 'minus' : '');
         const deltaText = entry.delta === 0 ? '—' : (entry.delta > 0 ? '+' + entry.delta : entry.delta);
-        return `<div class="log-entry"><span class="who">${escapeAttr(entry.text)}</span><span class="delta ${deltaClass}">${deltaText}</span></div>`;
+        return `<div class="log-item"><span><b>${escapeAttr(entry.text)}</b></span><span class="delta ${deltaClass}">${deltaText}</span></div>`;
       }).join('');
     } else {
-      logSection.style.display = 'none';
+      logEl.innerHTML = '';
     }
   }
 
@@ -446,6 +457,11 @@ export default function initLe5000(container) {
   container.querySelector('#resetBtn').onclick = resetGame;
   container.querySelector('#resetAllBtn').onclick = resetAll;
   container.querySelector('#undoBtn').onclick = undo;
+  container.querySelector('#logToggle').addEventListener('click', () => {
+    logEl.classList.toggle('open');
+    const open = logEl.classList.contains('open');
+    container.querySelector('#logToggle').textContent = (open ? '▾' : '▸') + ' Historique';
+  });
 
   render();
 }

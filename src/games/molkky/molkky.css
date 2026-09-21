@@ -202,16 +202,37 @@
 }
 .game-molkky .scoreboard::-webkit-scrollbar { display: none; }
 .game-molkky .chip {
+  position: relative;
   flex-shrink: 0;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 8px 12px;
+  padding: 8px 12px 4px;
   min-width: 74px;
   text-align: center;
+  touch-action: pan-x;
 }
 .game-molkky .chip.active { background: var(--moss); border-color: var(--moss); }
 .game-molkky .chip.active .chip-name, .game-molkky .chip.active .chip-score { color: var(--moss-ink); }
+.game-molkky .chip.dragging {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 10px 24px var(--shadow);
+  border-color: var(--amber);
+}
+.game-molkky .chip-drag {
+  display: block;
+  margin: 4px auto 0;
+  width: 28px;
+  cursor: grab;
+  touch-action: none;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.35;
+  color: var(--ink-soft);
+}
+.game-molkky .chip.active .chip-drag { color: var(--moss-ink); }
+.game-molkky .chip-drag:active { cursor: grabbing; opacity: 0.8; }
 .game-molkky .chip-name {
   font-size: 11.5px;
   color: var(--ink-soft);

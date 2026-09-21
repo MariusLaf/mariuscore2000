@@ -28,6 +28,8 @@ npm run preview
 
 Convention de stockage : chaque jeu utilise sa propre clé `localStorage` préfixée par son `id` (ex. `<id>-state-v1`), et garde si possible une forme minimale commune (`players: [{ name, score }]`, `log: [...]`) pour faciliter une éventuelle vue d'ensemble multi-jeux plus tard.
 
+Voir [CONTRIBUTING_GAMES.md](CONTRIBUTING_GAMES.md) pour la disposition d'écran et les fonctionnalités attendues sur tout nouveau compteur (renommage, glissé-déposé pour réordonner, historique, etc.).
+
 ## Déploiement
 
 Le déploiement sur GitHub Pages est automatisé via `.github/workflows/deploy.yml` à chaque push sur `main`.
