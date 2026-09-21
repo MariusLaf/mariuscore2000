@@ -1,16 +1,13 @@
 const MARKUP = `
 <div class="wrap">
-  <header>
-    <div class="title-block">
-      <h1>Le 5000 🎲</h1>
-      <div class="round-chip" id="roundChip">Manche 1</div>
+  <div class="brand">
+    <h1>Le 5000<span class="dot">.</span></h1>
+    <div class="header-actions">
+      <span class="round-chip" id="roundChip">Manche 1</span>
+      <button class="icon-btn-sm" id="undoBtn" title="Annuler le dernier tour">↩︎</button>
+      <button class="icon-btn-sm" id="resetBtn" title="Nouvelle partie">🔄</button>
+      <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🗑</button>
     </div>
-  </header>
-
-  <div class="header-actions">
-    <button class="icon-btn" id="undoBtn">↩︎ Annuler</button>
-    <button class="icon-btn" id="resetBtn">🔄 Nouvelle partie</button>
-    <button class="icon-btn danger" id="resetAllBtn">🗑 Réinitialiser</button>
   </div>
 
   <div id="winnerZone"></div>
@@ -29,7 +26,7 @@ const MARKUP = `
 
   <details class="collapsible">
     <summary>ℹ️ Règles du compteur</summary>
-    <div class="rules-note">On joue joueur après joueur : ajoute les points du tour par paliers de 100, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro.</div>
+    <div class="rules-note">On joue joueur après joueur : ajoute les points du tour par paliers de 100, puis "Valider le tour" pour passer au suivant. Tous les 3 coups à vide d'affilée, une pénalité s'applique automatiquement (−200, −400, −600…) — sauf tant que le joueur n'est pas encore entré en jeu (n'a jamais marqué de points). Dès qu'un joueur marque des points, son compteur de quequettes repart à zéro. Glisse une ligne du classement par sa poignée (⠿) pour changer l'ordre de passage.</div>
   </details>
 
   <details class="collapsible" id="logSection" style="display:none;">
@@ -172,6 +169,22 @@ export default function initLe5000(container) {
     saveState();
   }
 
+  function reorderPlayers(fromIndex, toIndex){
+    if(fromIndex === toIndex) return;
+    if(fromIndex < 0 || fromIndex >= state.players.length) return;
+    toIndex = Math.max(0, Math.min(state.players.length - 1, toIndex));
+    pushHistorySnapshot();
+    const currentId = currentPlayer() ? currentPlayer().id : null;
+    const [moved] = state.players.splice(fromIndex, 1);
+    state.players.splice(toIndex, 0, moved);
+    if(currentId){
+      const newIdx = state.players.findIndex(p => p.id === currentId);
+      if(newIdx !== -1) state.currentIndex = newIdx;
+    }
+    saveState();
+    render();
+  }
+
   function addLog(text, delta){
     state.log = state.log || [];
     state.log.unshift({ text, delta });
@@ -277,22 +290,15 @@ export default function initLe5000(container) {
       <div class="turn-card">
         <div class="turn-label">Au tour de</div>
         <div class="turn-name">${escapeAttr(p.name)}</div>
-        <div class="turn-total">Total actuel : ${formatScore(p.score)} pts · ${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</div>
+        <div class="turn-total">Total actuel : ${formatScore(p.score)} pts${state.pending > 0 ? ' · +' + state.pending + ' ce tour' : ''} · ${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</div>
 
-        <div class="pending-display">
-          <div class="pending-number">+${state.pending}</div>
-          <div class="pending-caption">points ce tour</div>
+        <p class="section-label">Ajouter des points</p>
+        <div class="tile-grid">
+          ${QUICK_VALUES.map(v => `<button class="tile-btn" data-quick="${v}">+${v}</button>`).join('')}
         </div>
-
-        <button class="plus50-btn" id="plus50Btn">+ 100</button>
-
-        <div class="quick-row">
-          ${QUICK_VALUES.map(v => `<button data-quick="${v}">+${v}</button>`).join('')}
-        </div>
-
-        <div class="adjust-row">
-          <button id="minus50Btn">− 100</button>
-          <button id="clearPendingBtn">Effacer</button>
+        <div class="tile-grid tile-grid-secondary">
+          <button class="tile-btn tile-btn-minor" id="minus100Btn">−100</button>
+          <button class="tile-btn tile-btn-minor" id="clearPendingBtn">Effacer</button>
         </div>
 
         <div class="custom-row">
@@ -309,8 +315,7 @@ export default function initLe5000(container) {
       </div>
     `;
 
-    container.querySelector('#plus50Btn').onclick = () => adjustPending(100);
-    container.querySelector('#minus50Btn').onclick = () => adjustPending(-100);
+    container.querySelector('#minus100Btn').onclick = () => adjustPending(-100);
     container.querySelector('#clearPendingBtn').onclick = clearPending;
     container.querySelector('#bustBtn').onclick = bustTurn;
     container.querySelector('#validateBtn').onclick = validateTurn;
@@ -330,6 +335,47 @@ export default function initLe5000(container) {
     });
   }
 
+  // ---------- Drag-to-reorder (pointer events: works with mouse and touch) ----------
+  let dragState = null;
+
+  function onDragPointerDown(e, index){
+    e.preventDefault();
+    const row = lbList.children[index];
+    if(!row) return;
+    const rect = row.getBoundingClientRect();
+    const styles = getComputedStyle(lbList);
+    const gap = parseFloat(styles.rowGap || styles.gap || '6') || 6;
+    dragState = {
+      startIndex: index,
+      currentIndex: index,
+      startY: e.clientY,
+      rowHeight: rect.height + gap,
+      row,
+      pointerId: e.pointerId
+    };
+    row.classList.add('dragging');
+    row.setPointerCapture(e.pointerId);
+  }
+
+  function onDragPointerMove(e){
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    const dy = e.clientY - dragState.startY;
+    dragState.row.style.transform = `translateY(${dy}px)`;
+    const shift = Math.round(dy / dragState.rowHeight);
+    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
+  }
+
+  function onDragPointerUp(e){
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    dragState.row.classList.remove('dragging');
+    dragState.row.style.transform = '';
+    const { startIndex, currentIndex } = dragState;
+    dragState = null;
+    if(currentIndex !== startIndex){
+      reorderPlayers(startIndex, currentIndex);
+    }
+  }
+
   function renderLeaderboard(){
     if(state.players.length === 0){
       leaderboardZone.style.display = 'none';
@@ -337,7 +383,8 @@ export default function initLe5000(container) {
     }
     leaderboardZone.style.display = 'block';
     lbList.innerHTML = state.players.map((p, i) => `
-      <div class="lb-row ${i === state.currentIndex ? 'is-current' : ''}">
+      <div class="lb-row ${i === state.currentIndex ? 'is-current' : ''}" data-index="${i}">
+        <span class="lb-drag" title="Glisser pour réordonner">⠿</span>
         <div class="lb-avatar">${escapeAttr(initials(p.name))}</div>
         <div class="lb-name-wrap">
           <input class="lb-name" data-id="${p.id}" value="${escapeAttr(p.name)}" maxlength="20">
@@ -353,6 +400,14 @@ export default function initLe5000(container) {
     });
     lbList.querySelectorAll('[data-remove]').forEach(btn => {
       btn.onclick = () => removePlayer(btn.getAttribute('data-remove'));
+    });
+    lbList.querySelectorAll('.lb-drag').forEach(handle => {
+      const row = handle.closest('.lb-row');
+      const index = parseInt(row.getAttribute('data-index'), 10);
+      handle.addEventListener('pointerdown', (e) => onDragPointerDown(e, index));
+      handle.addEventListener('pointermove', onDragPointerMove);
+      handle.addEventListener('pointerup', onDragPointerUp);
+      handle.addEventListener('pointercancel', onDragPointerUp);
     });
   }
 
