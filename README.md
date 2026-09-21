@@ -2,7 +2,7 @@
 
 Application web installable (PWA) qui centralise plusieurs compteurs de points pour jeux de société. Un shell neutre affiche la liste des jeux disponibles ; chaque jeu est un module autonome avec son propre thème visuel et sa propre sauvegarde locale.
 
-Jeux inclus : **Mölkky** et **Le 5000**.
+Jeux inclus : **Mölkky**, **Le 5000** et **Compteur libre** (points libres + compteur secondaire, pour improviser n'importe quel autre jeu sans avoir à coder un nouveau compteur).
 
 Voir le [cahier des charges](https://claude.ai/artifact/Hsh9BR1EjSaJCyV3TA8fkt) pour le détail de l'architecture et des décisions de conception.
 
