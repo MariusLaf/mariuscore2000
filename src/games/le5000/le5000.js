@@ -15,8 +15,6 @@ const MARKUP = `
 
   <div class="scoreboard" id="scoreboard"></div>
 
-  <button class="add-player-btn" id="addPlayerBtn">+ Ajouter un joueur</button>
-
   <div id="turnZone"></div>
 
   <button class="log-toggle" id="logToggle">▸ Historique</button>
@@ -308,7 +306,6 @@ export default function initLe5000(container) {
   }
 
   function renderScoreboard(){
-    scoreboard.classList.toggle('hidden', state.players.length === 0);
     scoreboard.innerHTML = state.players.map((p, i) => `
       <div class="chip ${i === state.currentIndex ? 'active' : ''}">
         <button class="chip-remove" data-remove="${p.id}" title="Retirer ce joueur">×</button>
@@ -319,7 +316,12 @@ export default function initLe5000(container) {
         <p class="chip-quequettes${p.quequettes > 0 ? ' has-some' : ''}">${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</p>
         <span class="chip-drag" data-drag="${i}" title="Glisser pour réordonner">⠿</span>
       </div>
-    `).join('');
+    `).join('') + `<button class="chip chip-add" id="addPlayerBtn" title="Ajouter un joueur">
+      <span class="chip-add-icon">+</span>
+      <span class="chip-add-label">Joueur</span>
+    </button>`;
+
+    scoreboard.querySelector('#addPlayerBtn').addEventListener('click', addPlayer);
 
     scoreboard.querySelectorAll('[data-remove]').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -421,7 +423,6 @@ export default function initLe5000(container) {
     }
   }
 
-  container.querySelector('#addPlayerBtn').onclick = addPlayer;
   container.querySelector('#resetBtn').onclick = resetGame;
   container.querySelector('#resetAllBtn').onclick = resetAll;
   container.querySelector('#undoBtn').onclick = undo;

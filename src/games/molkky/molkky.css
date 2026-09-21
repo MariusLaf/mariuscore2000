@@ -154,18 +154,19 @@
   cursor: pointer;
   flex-shrink: 0;
 }
-.game-molkky .add-btn {
+.game-molkky .player-row-add {
   width: 100%;
-  padding: 12px;
+  padding: 12px 14px;
   border-radius: 12px;
   border: 1px dashed var(--line);
   background: transparent;
   color: var(--ink-soft);
   font-family: inherit;
   font-size: 14.5px;
+  text-align: left;
   cursor: pointer;
-  margin-bottom: 18px;
 }
+.game-molkky .player-row-add:active { background: var(--surface-2); }
 .game-molkky .primary-btn {
   width: 100%;
   padding: 15px;

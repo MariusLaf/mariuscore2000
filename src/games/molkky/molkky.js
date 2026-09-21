@@ -17,7 +17,6 @@ const MARKUP = `
   <div id="setupScreen" class="card">
     <p class="lead">Ajoutez les joueurs, dans l'ordre de passage. Premier à exactement 50 points gagne.</p>
     <div class="player-rows" id="playerRows"></div>
-    <button class="add-btn" id="addPlayerBtn">+ Ajouter un joueur</button>
 
     <button class="primary-btn" id="startBtn">Commencer la partie</button>
   </div>
@@ -191,8 +190,17 @@ export default function initMolkky(container) {
 
   // ---------- SETUP SCREEN ----------
   const playerRows = container.querySelector('#playerRows');
-  const addPlayerBtn = container.querySelector('#addPlayerBtn');
   const startBtn = container.querySelector('#startBtn');
+
+  const addPlayerBtn = document.createElement('button');
+  addPlayerBtn.type = 'button';
+  addPlayerBtn.className = 'player-row-add';
+  addPlayerBtn.textContent = '+ Ajouter un joueur';
+  addPlayerBtn.addEventListener('click', () => {
+    state.playerNames.push('');
+    renderSetup();
+    saveState();
+  });
 
   function renderSetup() {
     playerRows.innerHTML = '';
@@ -223,6 +231,7 @@ export default function initMolkky(container) {
       }
       playerRows.appendChild(row);
     });
+    playerRows.appendChild(addPlayerBtn);
     updateStartState();
   }
 
@@ -230,12 +239,6 @@ export default function initMolkky(container) {
     const valid = state.playerNames.filter(n => n.trim().length > 0).length >= 1;
     startBtn.disabled = !valid;
   }
-
-  addPlayerBtn.addEventListener('click', () => {
-    state.playerNames.push('');
-    renderSetup();
-    saveState();
-  });
 
   startBtn.addEventListener('click', () => {
     const names = state.playerNames.map(n => n.trim()).filter(n => n.length > 0);

@@ -289,21 +289,23 @@
 }
 .game-le5000 .btn-validate:not(:disabled):active{ background: var(--felt-700); }
 
-.game-le5000 .add-player-btn{
-  display: block;
-  width: 100%;
-  margin: 0 0 20px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px dashed var(--line);
+.game-le5000 .chip-add{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 78px;
   background: transparent;
+  border: 1px dashed var(--line);
   color: var(--cream);
-  opacity: 0.75;
+  opacity: 0.6;
   font-family: inherit;
-  font-size: 14.5px;
   cursor: pointer;
 }
-.game-le5000 .add-player-btn:active{ background: rgba(255,255,255,0.05); }
+.game-le5000 .chip-add:active{ background: rgba(255,255,255,0.05); opacity: 0.85; }
+.game-le5000 .chip-add-icon{ font-size: 1.3rem; line-height: 1; }
+.game-le5000 .chip-add-label{ font-size: 10.5px; }
 
 .game-le5000 .log-toggle{
   width: 100%;
