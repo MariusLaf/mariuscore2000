@@ -1,0 +1,448 @@
+.game-le5000{
+  --felt-900:#0f2a20;
+  --felt-800:#173d2d;
+  --felt-700:#1f4f39;
+  --felt-600:#2a6248;
+  --cream:#f4ecd8;
+  --gold:#d9a441;
+  --gold-dim:#a97e33;
+  --gold-bright:#f0bc5e;
+  --red:#c0483f;
+  --red-dim:#8a352e;
+  --ivory:#fbf8f2;
+  --line: rgba(244,236,216,0.14);
+  color-scheme: dark;
+
+  display: block;
+  min-height: 100%;
+  margin:0;
+  background: radial-gradient(ellipse at top, var(--felt-700) 0%, var(--felt-900) 70%);
+  background-attachment: fixed;
+  color: var(--cream);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.game-le5000 *{box-sizing:border-box;}
+
+.game-le5000 .wrap{
+  max-width: 560px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.game-le5000 header{
+  padding: 20px 4px 4px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.game-le5000 header .title-block h1{
+  font-family:'Fredoka', system-ui, sans-serif;
+  font-weight:700;
+  font-size: 1.45rem;
+  margin:0;
+  color: var(--gold);
+}
+.game-le5000 .round-chip{
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-top: 3px;
+}
+.game-le5000 .header-actions{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 4px 20px;
+}
+.game-le5000 .icon-btn{
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 12px;
+  padding: 10px 6px;
+  font-size: 0.74rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-le5000 .icon-btn:active{ background: rgba(255,255,255,0.11); }
+.game-le5000 .icon-btn.danger{
+  color: #e6a49e;
+  border-color: rgba(192,72,63,0.35);
+}
+
+.game-le5000 .winner-banner{
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: var(--felt-900);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  font-size: 1.02rem;
+  margin: 0 4px 16px;
+  box-shadow: 0 6px 20px rgba(217,164,65,0.25);
+}
+
+.game-le5000 .turn-card{
+  background: linear-gradient(180deg, rgba(217,164,65,0.10), rgba(217,164,65,0.02));
+  border: 1px solid rgba(217,164,65,0.35);
+  border-radius: 22px;
+  padding: 20px 18px 18px;
+  margin: 0 4px 18px;
+}
+.game-le5000 .turn-label{
+  font-size: 0.72rem;
+  text-transform: none;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+.game-le5000 .turn-name{
+  font-family:'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--ivory);
+}
+.game-le5000 .turn-total{
+  font-size: 0.8rem;
+  opacity: 0.55;
+  margin-top: 2px;
+}
+
+.game-le5000 .pending-display{
+  text-align:center;
+  margin: 18px 0 14px;
+}
+.game-le5000 .pending-number{
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 3.4rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+}
+.game-le5000 .pending-caption{
+  font-size: 0.72rem;
+  opacity: 0.5;
+  margin-top: 4px;
+}
+
+.game-le5000 .plus50-btn{
+  display:block;
+  width: 100%;
+  background: var(--gold);
+  color: var(--felt-900);
+  border: none;
+  border-radius: 16px;
+  padding: 18px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.game-le5000 .plus50-btn:active{ background: var(--gold-bright); transform: scale(0.99); }
+
+.game-le5000 .quick-row{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.game-le5000 .quick-row button{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 10px;
+  padding: 10px 4px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.game-le5000 .quick-row button:active{ background: rgba(255,255,255,0.14); }
+
+.game-le5000 .adjust-row{
+  display:flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.game-le5000 .adjust-row button{
+  flex:1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream);
+  opacity: 0.75;
+  border-radius: 10px;
+  padding: 9px 6px;
+  font-size: 0.78rem;
+  font-family: inherit;
+}
+
+.game-le5000 .custom-row{
+  display:flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.game-le5000 .custom-row input{
+  flex:1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+}
+.game-le5000 .custom-row button{
+  background: rgba(217,164,65,0.15);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-family: inherit;
+  font-weight:600;
+  font-size: 0.82rem;
+}
+
+.game-le5000 .streak-note{
+  text-align:center;
+  font-size: 0.78rem;
+  color: #e6a49e;
+  margin-bottom: 12px;
+  min-height: 1.1em;
+}
+
+.game-le5000 .main-actions{
+  display:flex;
+  gap: 10px;
+}
+.game-le5000 .btn{
+  flex:1;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 8px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.game-le5000 .btn-bust{
+  background: rgba(192,72,63,0.18);
+  color: #e6a49e;
+  border: 1px solid rgba(192,72,63,0.4);
+}
+.game-le5000 .btn-bust:active{ background: rgba(192,72,63,0.3); }
+.game-le5000 .btn-validate{
+  background: var(--felt-600);
+  color: var(--ivory);
+  border: 1px solid rgba(244,236,216,0.25);
+}
+.game-le5000 .btn-validate:disabled{
+  opacity: 0.35;
+}
+.game-le5000 .btn-validate:not(:disabled):active{ background: var(--felt-700); }
+
+.game-le5000 .leaderboard{
+  margin: 4px 4px 18px;
+}
+.game-le5000 .leaderboard h2{
+  font-family:'Fredoka', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.6;
+  margin: 0 0 8px 2px;
+}
+.game-le5000 .lb-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.03);
+}
+.game-le5000 .lb-row.is-current{
+  background: rgba(217,164,65,0.10);
+  border: 1px solid rgba(217,164,65,0.3);
+}
+.game-le5000 .lb-avatar{
+  width: 34px; height:34px;
+  border-radius: 50%;
+  background: var(--felt-600);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  font-size: 0.9rem;
+  flex-shrink:0;
+  color: var(--cream);
+}
+.game-le5000 .lb-row.is-current .lb-avatar{
+  background: var(--gold);
+  color: var(--felt-900);
+}
+.game-le5000 .lb-name-wrap{ flex:1; min-width:0; }
+.game-le5000 .lb-name{
+  background: transparent;
+  border:none;
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: 100%;
+  padding: 1px 0;
+  outline:none;
+}
+.game-le5000 .lb-sub{
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+.game-le5000 .lb-score{
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ivory);
+}
+.game-le5000 .lb-remove{
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  opacity: 0.35;
+  font-size: 1rem;
+  padding: 4px 6px;
+}
+
+.game-le5000 .add-player{
+  display:flex;
+  gap: 8px;
+  margin: 6px 4px 22px;
+}
+.game-le5000 .add-player input{
+  flex:1;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed var(--line);
+  color: var(--cream);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.game-le5000 .add-player button{
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.game-le5000 .rules-note{
+  font-size: 0.78rem;
+  opacity: 0.7;
+  padding: 4px 2px 2px;
+  line-height: 1.55;
+}
+.game-le5000 details.collapsible{
+  margin: 0 4px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 4px 12px;
+}
+.game-le5000 details.collapsible summary{
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 0;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.75;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+}
+.game-le5000 details.collapsible summary::-webkit-details-marker{ display:none; }
+.game-le5000 details.collapsible summary::after{
+  content: '▾';
+  opacity: 0.5;
+  transition: transform 0.15s ease;
+}
+.game-le5000 details.collapsible[open] summary::after{ transform: rotate(180deg); }
+.game-le5000 details.collapsible > div{ padding-bottom: 12px; }
+
+.game-le5000 .log-entry{
+  display:flex;
+  justify-content: space-between;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+.game-le5000 .log-entry:last-child{ border-bottom: none; }
+.game-le5000 .log-entry .who{ opacity: 0.85; }
+.game-le5000 .delta{ font-variant-numeric: tabular-nums; font-weight: 600; }
+.game-le5000 .delta.plus{ color: #b7d9b0; }
+.game-le5000 .delta.minus{ color: #e6a49e; }
+
+.game-le5000 .empty{
+  text-align:center;
+  opacity: 0.5;
+  padding: 30px 10px;
+  font-size: 0.9rem;
+}
+.game-le5000 .modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(15,42,32,0.75);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 100;
+  padding: 20px;
+}
+.game-le5000 .modal-box{
+  background: var(--felt-800);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.game-le5000 .modal-box p{
+  margin: 0 0 18px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--cream);
+}
+.game-le5000 .modal-actions{
+  display:flex;
+  gap: 10px;
+}
+.game-le5000 .modal-actions button{
+  flex:1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 8px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.game-le5000 .modal-cancel{
+  background: rgba(255,255,255,0.08);
+  color: var(--cream);
+}
+.game-le5000 .modal-confirm{
+  background: var(--red);
+  color: var(--ivory);
+}
