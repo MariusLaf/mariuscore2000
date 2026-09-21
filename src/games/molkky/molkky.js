@@ -1,3 +1,5 @@
+import { createPlayerBoard, attachLogToggle } from '../../shared/player-board.js';
+
 const MARKUP = `
 <div class="wrap">
 
@@ -113,8 +115,6 @@ export default function initMolkky(container) {
 
   let state = loadState() || freshState();
   let history = []; // stack of state snapshots for undo
-  let editingPlayerIndex = null; // index of the chip currently being renamed
-  let dragState = null; // in-progress chip drag (reorder)
 
   function freshState() {
     return {
@@ -325,10 +325,7 @@ export default function initMolkky(container) {
     render();
   });
 
-  logToggle.addEventListener('click', () => {
-    logEl.classList.toggle('open');
-    logToggle.textContent = (logEl.classList.contains('open') ? '▾' : '▸') + ' Historique des lancers';
-  });
+  attachLogToggle(logToggle, logEl, 'Historique des lancers');
 
   newGameBtn.addEventListener('click', resetToSetup);
   playAgainBtn.addEventListener('click', resetToSetup);
@@ -359,78 +356,16 @@ export default function initMolkky(container) {
     return (fromIndex + 1) % n;
   }
 
-  function addPlayer() {
-    pushHistory();
-    state.players.push({ name: 'Joueur ' + (state.players.length + 1), score: 0, misses: 0 });
-    editingPlayerIndex = state.players.length - 1; // straight into rename mode: named in the tile
-    saveState();
-    render();
-  }
-
-  function removePlayer(index) {
-    pushHistory();
-    state.players.splice(index, 1);
-    if (index < state.currentIndex) state.currentIndex -= 1;
-    if (state.currentIndex >= state.players.length) state.currentIndex = 0;
-    if (state.currentIndex < 0) state.currentIndex = 0;
-    saveState();
-    render();
-  }
-
-  function reorderPlayers(fromIndex, toIndex) {
-    if (fromIndex === toIndex) return;
-    if (fromIndex < 0 || fromIndex >= state.players.length) return;
-    toIndex = Math.max(0, Math.min(state.players.length - 1, toIndex));
-    pushHistory();
-    const currentPlayerRef = state.players[state.currentIndex];
-    const [moved] = state.players.splice(fromIndex, 1);
-    state.players.splice(toIndex, 0, moved);
-    state.currentIndex = state.players.indexOf(currentPlayerRef);
-    saveState();
-    render();
-  }
-
-  // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
-  // Pointer capture must be set on the SAME element the move/up listeners are attached to
-  // (the handle), otherwise events get redirected to the captured element and never reach them.
-  function onChipDragStart(e, index) {
-    e.preventDefault();
-    const handle = e.currentTarget;
-    const chip = scoreboard.children[index];
-    if (!chip) return;
-    const rect = chip.getBoundingClientRect();
-    const styles = getComputedStyle(scoreboard);
-    const gap = parseFloat(styles.columnGap || styles.gap || '8') || 8;
-    dragState = {
-      startIndex: index,
-      currentIndex: index,
-      startX: e.clientX,
-      chipWidth: rect.width + gap,
-      chip,
-      pointerId: e.pointerId
-    };
-    chip.classList.add('dragging');
-    handle.setPointerCapture(e.pointerId);
-  }
-
-  function onChipDragMove(e) {
-    if (!dragState || e.pointerId !== dragState.pointerId) return;
-    const dx = e.clientX - dragState.startX;
-    dragState.chip.style.transform = `translateX(${dx}px)`;
-    const shift = Math.round(dx / dragState.chipWidth);
-    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
-  }
-
-  function onChipDragEnd(e) {
-    if (!dragState || e.pointerId !== dragState.pointerId) return;
-    dragState.chip.classList.remove('dragging');
-    dragState.chip.style.transform = '';
-    const { startIndex, currentIndex } = dragState;
-    dragState = null;
-    if (currentIndex !== startIndex) {
-      reorderPlayers(startIndex, currentIndex);
-    }
-  }
+  const playerBoard = createPlayerBoard({
+    container: scoreboard,
+    getPlayers: () => state.players,
+    getCurrentIndex: () => state.currentIndex,
+    setCurrentIndex: (i) => { state.currentIndex = i; },
+    newPlayer: () => ({ score: 0, misses: 0 }),
+    renderStat: (p) => `<div class="chip-miss-dots">${[0, 1, 2].map((d) => `<span class="chip-miss-dot${d < p.misses ? ' filled' : ''}"></span>`).join('')}</div>`,
+    beforeChange: () => pushHistory(),
+    afterChange: () => { saveState(); render(); }
+  });
 
   function applyThrow(label, points) {
     if (state.phase !== 'playing' || state.players.length === 0) return;
@@ -523,87 +458,7 @@ export default function initMolkky(container) {
     emptyState.classList.toggle('hidden', state.players.length > 0);
     throwControls.classList.toggle('hidden', state.players.length === 0);
 
-    scoreboard.innerHTML = '';
-    state.players.forEach((p, i) => {
-      const chip = document.createElement('div');
-      chip.className = 'chip' + (i === state.currentIndex ? ' active' : '');
-
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'chip-remove';
-      removeBtn.textContent = '×';
-      removeBtn.title = 'Retirer ce joueur';
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        removePlayer(i);
-      });
-      chip.appendChild(removeBtn);
-
-      if (editingPlayerIndex === i) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'chip-name-input';
-        input.value = p.name;
-        input.maxLength = 20;
-        const commit = () => {
-          const trimmed = input.value.trim();
-          if (trimmed) p.name = trimmed;
-          editingPlayerIndex = null;
-          saveState();
-          render();
-        };
-        input.addEventListener('blur', commit);
-        input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') input.blur();
-          if (e.key === 'Escape') { editingPlayerIndex = null; render(); }
-        });
-        input.addEventListener('click', (e) => e.stopPropagation());
-        chip.appendChild(input);
-        setTimeout(() => { input.focus(); input.select(); }, 0);
-      } else {
-        const nameEl = document.createElement('p');
-        nameEl.className = 'chip-name';
-        nameEl.textContent = p.name;
-        nameEl.title = 'Toucher pour renommer';
-        nameEl.addEventListener('click', () => {
-          editingPlayerIndex = i;
-          render();
-        });
-        chip.appendChild(nameEl);
-      }
-
-      const scoreEl = document.createElement('p');
-      scoreEl.className = 'chip-score';
-      scoreEl.textContent = p.score;
-      chip.appendChild(scoreEl);
-      const chipDots = document.createElement('div');
-      chipDots.className = 'chip-miss-dots';
-      for (let d = 0; d < 3; d++) {
-        const dot = document.createElement('span');
-        dot.className = 'chip-miss-dot' + (d < p.misses ? ' filled' : '');
-        chipDots.appendChild(dot);
-      }
-      chip.appendChild(chipDots);
-
-      const dragHandle = document.createElement('span');
-      dragHandle.className = 'chip-drag';
-      dragHandle.title = 'Glisser pour réordonner';
-      dragHandle.textContent = '⠿';
-      dragHandle.addEventListener('pointerdown', (e) => onChipDragStart(e, i));
-      dragHandle.addEventListener('pointermove', onChipDragMove);
-      dragHandle.addEventListener('pointerup', onChipDragEnd);
-      dragHandle.addEventListener('pointercancel', onChipDragEnd);
-      chip.appendChild(dragHandle);
-
-      scoreboard.appendChild(chip);
-    });
-
-    const addChip = document.createElement('button');
-    addChip.type = 'button';
-    addChip.className = 'chip chip-add';
-    addChip.title = 'Ajouter un joueur';
-    addChip.innerHTML = '<span class="chip-add-icon">+</span><span class="chip-add-label">Joueur</span>';
-    addChip.addEventListener('click', addPlayer);
-    scoreboard.appendChild(addChip);
+    playerBoard.render();
 
     undoBtn.style.opacity = history.length === 0 ? '0.5' : '1';
 

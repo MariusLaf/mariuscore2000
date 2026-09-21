@@ -58,7 +58,7 @@ async function render() {
   backBar.appendChild(backBtn);
 
   const gameContainer = document.createElement('div');
-  gameContainer.className = `game-screen game-${manifest.id}`;
+  gameContainer.className = `game-screen game-root game-${manifest.id}`;
 
   root.appendChild(backBar);
   root.appendChild(gameContainer);

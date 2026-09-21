@@ -1,3 +1,5 @@
+import { createPlayerBoard, attachLogToggle } from '../../shared/player-board.js';
+
 const MARKUP = `
 <div class="wrap">
   <div class="brand">
@@ -59,9 +61,6 @@ export default function initLe5000(container) {
   state.pending = Math.max(0, Math.round(state.pending / 100) * 100);
   state.players.forEach(p => { if(typeof p.started !== 'boolean') p.started = p.score > 0; if(typeof p.quequettes !== 'number') p.quequettes = 0; if(typeof p.streak !== 'number') p.streak = 0; });
 
-  let editingPlayerId = null; // id of the chip currently being renamed
-  let dragState = null; // in-progress chip drag (reorder)
-
   const scoreboard = container.querySelector('#scoreboard');
   const turnZone = container.querySelector('#turnZone');
   const winnerZoneEl = container.querySelector('#winnerZone');
@@ -97,7 +96,6 @@ export default function initLe5000(container) {
     };
   }
 
-  function uid(){ return Math.random().toString(36).slice(2,9); }
   function round100(n){ return Math.round(n / 100) * 100; }
   function formatScore(n){
     return n.toLocaleString('fr-CH');
@@ -139,49 +137,6 @@ export default function initLe5000(container) {
       state.round += 1;
     }
     state.pending = 0;
-  }
-
-  function addPlayer(){
-    pushHistorySnapshot();
-    const player = { id: uid(), name: 'Joueur ' + (state.players.length + 1), score: 0, streak: 0, turns: 0, started: false, quequettes: 0 };
-    state.players.push(player);
-    editingPlayerId = player.id; // straight into rename mode: the player is named in the tile
-    saveState();
-    render();
-  }
-
-  function removePlayer(id){
-    pushHistorySnapshot();
-    const idx = state.players.findIndex(p => p.id === id);
-    state.players = state.players.filter(p => p.id !== id);
-    if(idx !== -1 && idx < state.currentIndex) state.currentIndex -= 1;
-    if(state.currentIndex >= state.players.length) state.currentIndex = 0;
-    saveState();
-    render();
-  }
-
-  function renamePlayer(id, name){
-    const p = state.players.find(p => p.id === id);
-    if(!p) return;
-    const trimmed = name.trim();
-    if(trimmed) p.name = trimmed;
-    saveState();
-  }
-
-  function reorderPlayers(fromIndex, toIndex){
-    if(fromIndex === toIndex) return;
-    if(fromIndex < 0 || fromIndex >= state.players.length) return;
-    toIndex = Math.max(0, Math.min(state.players.length - 1, toIndex));
-    pushHistorySnapshot();
-    const currentId = currentPlayer() ? currentPlayer().id : null;
-    const [moved] = state.players.splice(fromIndex, 1);
-    state.players.splice(toIndex, 0, moved);
-    if(currentId){
-      const newIdx = state.players.findIndex(p => p.id === currentId);
-      if(newIdx !== -1) state.currentIndex = newIdx;
-    }
-    saveState();
-    render();
   }
 
   function addLog(text, delta){
@@ -263,102 +218,17 @@ export default function initLe5000(container) {
 
   const QUICK_VALUES = [100, 200, 500];
 
-  // ---------- Drag-to-reorder chips (pointer events: works with mouse and touch) ----------
-  // Pointer capture must be set on the SAME element the move/up listeners are attached to
-  // (the handle), otherwise events get redirected to the captured element and never reach them.
-  function onChipDragStart(e, index){
-    e.preventDefault();
-    const handle = e.currentTarget;
-    const chip = scoreboard.children[index];
-    if(!chip) return;
-    const rect = chip.getBoundingClientRect();
-    const styles = getComputedStyle(scoreboard);
-    const gap = parseFloat(styles.columnGap || styles.gap || '8') || 8;
-    dragState = {
-      startIndex: index,
-      currentIndex: index,
-      startX: e.clientX,
-      chipWidth: rect.width + gap,
-      chip,
-      pointerId: e.pointerId
-    };
-    chip.classList.add('dragging');
-    handle.setPointerCapture(e.pointerId);
-  }
-
-  function onChipDragMove(e){
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    const dx = e.clientX - dragState.startX;
-    dragState.chip.style.transform = `translateX(${dx}px)`;
-    const shift = Math.round(dx / dragState.chipWidth);
-    dragState.currentIndex = Math.min(state.players.length - 1, Math.max(0, dragState.startIndex + shift));
-  }
-
-  function onChipDragEnd(e){
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    dragState.chip.classList.remove('dragging');
-    dragState.chip.style.transform = '';
-    const { startIndex, currentIndex } = dragState;
-    dragState = null;
-    if(currentIndex !== startIndex){
-      reorderPlayers(startIndex, currentIndex);
-    }
-  }
-
-  function renderScoreboard(){
-    scoreboard.innerHTML = state.players.map((p, i) => `
-      <div class="chip ${i === state.currentIndex ? 'active' : ''}">
-        <button class="chip-remove" data-remove="${p.id}" title="Retirer ce joueur">×</button>
-        ${editingPlayerId === p.id
-          ? `<input type="text" class="chip-name-input" data-editing="${p.id}" value="${escapeAttr(p.name)}" maxlength="20">`
-          : `<p class="chip-name" data-rename="${p.id}" title="Toucher pour renommer">${escapeAttr(p.name)}</p>`}
-        <p class="chip-score">${formatScore(p.score)}</p>
-        <p class="chip-quequettes${p.quequettes > 0 ? ' has-some' : ''}">${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</p>
-        <span class="chip-drag" data-drag="${i}" title="Glisser pour réordonner">⠿</span>
-      </div>
-    `).join('') + `<button class="chip chip-add" id="addPlayerBtn" title="Ajouter un joueur">
-      <span class="chip-add-icon">+</span>
-      <span class="chip-add-label">Joueur</span>
-    </button>`;
-
-    scoreboard.querySelector('#addPlayerBtn').addEventListener('click', addPlayer);
-
-    scoreboard.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        removePlayer(btn.getAttribute('data-remove'));
-      });
-    });
-    scoreboard.querySelectorAll('[data-rename]').forEach(el => {
-      el.addEventListener('click', () => {
-        editingPlayerId = el.getAttribute('data-rename');
-        render();
-      });
-    });
-    scoreboard.querySelectorAll('[data-editing]').forEach(input => {
-      const id = input.getAttribute('data-editing');
-      const commit = () => {
-        const trimmed = input.value.trim();
-        if(trimmed) renamePlayer(id, trimmed);
-        editingPlayerId = null;
-        render();
-      };
-      input.addEventListener('blur', commit);
-      input.addEventListener('keydown', (e) => {
-        if(e.key === 'Enter') input.blur();
-        if(e.key === 'Escape'){ editingPlayerId = null; render(); }
-      });
-      input.addEventListener('click', (e) => e.stopPropagation());
-      setTimeout(() => { input.focus(); input.select(); }, 0);
-    });
-    scoreboard.querySelectorAll('[data-drag]').forEach(handle => {
-      const index = parseInt(handle.getAttribute('data-drag'), 10);
-      handle.addEventListener('pointerdown', (e) => onChipDragStart(e, index));
-      handle.addEventListener('pointermove', onChipDragMove);
-      handle.addEventListener('pointerup', onChipDragEnd);
-      handle.addEventListener('pointercancel', onChipDragEnd);
-    });
-  }
+  const playerBoard = createPlayerBoard({
+    container: scoreboard,
+    getPlayers: () => state.players,
+    getCurrentIndex: () => state.currentIndex,
+    setCurrentIndex: (i) => { state.currentIndex = i; },
+    newPlayer: () => ({ score: 0, streak: 0, turns: 0, started: false, quequettes: 0 }),
+    formatScore,
+    renderStat: (p) => `<p class="chip-quequettes${p.quequettes > 0 ? ' has-some' : ''}">${p.quequettes} quequette${p.quequettes !== 1 ? 's' : ''}</p>`,
+    beforeChange: () => pushHistorySnapshot(),
+    afterChange: () => { saveState(); render(); }
+  });
 
   function renderTurnZone(){
     const p = currentPlayer();
@@ -409,7 +279,7 @@ export default function initLe5000(container) {
 
     roundChip.textContent = 'Manche ' + state.round;
 
-    renderScoreboard();
+    playerBoard.render();
     renderTurnZone();
 
     if(state.log && state.log.length > 0){
@@ -426,11 +296,7 @@ export default function initLe5000(container) {
   container.querySelector('#resetBtn').onclick = resetGame;
   container.querySelector('#resetAllBtn').onclick = resetAll;
   container.querySelector('#undoBtn').onclick = undo;
-  container.querySelector('#logToggle').addEventListener('click', () => {
-    logEl.classList.toggle('open');
-    const open = logEl.classList.contains('open');
-    container.querySelector('#logToggle').textContent = (open ? '▾' : '▸') + ' Historique';
-  });
+  attachLogToggle(container.querySelector('#logToggle'), logEl, 'Historique');
 
   render();
 }

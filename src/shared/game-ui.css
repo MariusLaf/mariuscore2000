@@ -1,0 +1,214 @@
+/*
+ * Shared structural styles for the game header, player scoreboard and history
+ * log. Scoped under .game-root — the class the shell puts on every mounted
+ * game's container (see src/shell/app.js) — so these rules never leak outside
+ * a game screen. Colors and fonts come from each game's own --ui-* variables
+ * (set under its .game-<id> root, see CONTRIBUTING_GAMES.md); this file never
+ * hardcodes a color, only layout/sizing, so every game keeps its own theme.
+ */
+
+/* ---- Header ---- */
+.game-root .brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 20px 4px 18px;
+}
+.game-root .brand h1 {
+  font-family: var(--ui-heading-font, inherit);
+  font-weight: var(--ui-heading-weight, 700);
+  font-size: var(--ui-heading-size, 1.45rem);
+  letter-spacing: var(--ui-heading-tracking, normal);
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--ui-heading-color, inherit);
+}
+.game-root .brand h1 .dot { color: var(--ui-accent); }
+
+.game-root .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.game-root .header-actions::-webkit-scrollbar { display: none; }
+
+.game-root .icon-btn-sm {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-ink-soft);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.game-root .icon-btn-sm:active { transform: scale(0.92); }
+.game-root .icon-btn-sm.danger {
+  color: var(--ui-danger, #e6a49e);
+  border-color: var(--ui-danger-border, rgba(192, 72, 63, 0.35));
+}
+
+/* ---- Scoreboard (one chip per player) ---- */
+.game-root .scoreboard {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 12px;
+  margin-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.game-root .scoreboard::-webkit-scrollbar { display: none; }
+
+.game-root .chip {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  padding: 8px 12px 4px;
+  min-width: var(--ui-chip-min-width, 84px);
+  text-align: center;
+  touch-action: pan-x;
+  font-family: inherit;
+}
+.game-root .chip.active {
+  background: var(--ui-active-bg);
+  border-color: var(--ui-active-border);
+}
+.game-root .chip.active .chip-name,
+.game-root .chip.active .chip-score,
+.game-root .chip.active .chip-remove,
+.game-root .chip.active .chip-drag {
+  color: var(--ui-active-ink);
+}
+.game-root .chip.dragging {
+  z-index: 5;
+  box-shadow: 0 10px 24px var(--ui-shadow, rgba(0, 0, 0, 0.35));
+  border-color: var(--ui-drag-border, var(--ui-active-border));
+}
+
+.game-root .chip-remove {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: var(--ui-ink-soft);
+  opacity: 0.4;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+.game-root .chip-remove:active { opacity: 0.85; }
+
+.game-root .chip-name {
+  font-size: 11.5px;
+  color: var(--ui-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  margin: 4px 0 2px;
+  cursor: pointer;
+  border-bottom: 1px dotted transparent;
+}
+.game-root .chip-name:hover { border-bottom-color: var(--ui-ink-soft); }
+.game-root .chip.active .chip-name:hover { border-bottom-color: var(--ui-active-ink); }
+.game-root .chip-name-input {
+  display: block;
+  width: var(--ui-chip-min-width, 84px);
+  max-width: 100px;
+  margin: 4px auto 2px;
+  font-family: inherit;
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--ui-ink);
+  background: var(--ui-surface-2, var(--ui-surface));
+  border: 1px solid var(--ui-accent);
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+.game-root .chip-score {
+  font-family: var(--ui-score-font, inherit);
+  font-weight: var(--ui-score-weight, 700);
+  font-size: var(--ui-score-size, 1.1rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
+  margin: 0;
+}
+.game-root .chip-drag {
+  display: block;
+  margin: 4px auto 0;
+  width: 36px;
+  cursor: grab;
+  touch-action: none;
+  font-size: 13px;
+  line-height: 1;
+  padding: 6px 0;
+  opacity: 0.35;
+  color: var(--ui-ink-soft);
+}
+.game-root .chip.active .chip-drag { opacity: 0.55; }
+.game-root .chip-drag:active { cursor: grabbing; opacity: 0.85; }
+
+.game-root .chip-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--ui-add-min-height, 78px);
+  background: transparent;
+  border: 1px dashed var(--ui-line);
+  color: var(--ui-ink-soft);
+  opacity: 0.65;
+  font-family: inherit;
+  cursor: pointer;
+}
+.game-root .chip-add:active { background: var(--ui-surface-2, rgba(255, 255, 255, 0.05)); opacity: 0.9; }
+.game-root .chip-add-icon { font-size: 1.25rem; line-height: 1; }
+.game-root .chip-add-label { font-size: 10.5px; }
+
+/* ---- History log ---- */
+.game-root .log-toggle {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--ui-ink-soft);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 2px;
+  cursor: pointer;
+}
+.game-root .log { display: none; flex-direction: column; gap: 6px; margin-top: 6px; }
+.game-root .log.open { display: flex; }
+.game-root .log-item {
+  font-size: 13px;
+  color: var(--ui-ink-soft);
+  padding: 8px 12px;
+  background: var(--ui-surface);
+  border-radius: 10px;
+  border: 1px solid var(--ui-line);
+  display: flex;
+  justify-content: space-between;
+}
+.game-root .log-item b { color: var(--ui-ink); font-weight: 600; }
+.game-root .delta { font-variant-numeric: tabular-nums; font-weight: 600; }
+.game-root .delta.plus { color: var(--ui-success, #b7d9b0); }
+.game-root .delta.minus { color: var(--ui-danger, #e6a49e); }
+
+.game-root .empty {
+  text-align: center;
+  color: var(--ui-ink-soft);
+  padding: 30px 10px;
+  font-size: 0.9rem;
+}

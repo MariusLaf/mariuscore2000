@@ -1,3 +1,5 @@
+@import '../../shared/game-ui.css';
+
 .game-molkky {
   --bg: #F3ECDD;
   --surface: #FBF7EE;
@@ -13,6 +15,29 @@
   --line: #E0D3B4;
   --shadow: rgba(59, 46, 34, 0.12);
   color-scheme: light dark;
+
+  /* shared game-ui.css tokens */
+  --ui-surface: var(--surface);
+  --ui-surface-2: var(--surface-2);
+  --ui-line: var(--line);
+  --ui-ink: var(--ink);
+  --ui-ink-soft: var(--ink-soft);
+  --ui-accent: var(--moss);
+  --ui-active-bg: var(--moss);
+  --ui-active-border: var(--moss);
+  --ui-active-ink: var(--moss-ink);
+  --ui-drag-border: var(--amber);
+  --ui-heading-font: 'Fraunces', serif;
+  --ui-heading-weight: 600;
+  --ui-heading-size: 28px;
+  --ui-heading-tracking: -0.01em;
+  --ui-score-font: 'Fraunces', serif;
+  --ui-score-weight: 600;
+  --ui-score-size: 20px;
+  --ui-chip-min-width: 84px;
+  --ui-shadow: var(--shadow);
+  --ui-danger: var(--red);
+  --ui-danger-border: var(--red-soft);
 
   display: block;
   min-height: 100%;
@@ -65,46 +90,6 @@
   padding: 20px 18px 40px;
   min-height: 100%;
 }
-.game-molkky .brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-  gap: 10px;
-}
-.game-molkky .brand h1 {
-  font-family: 'Fraunces', serif;
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-size: 28px;
-  letter-spacing: -0.01em;
-  margin: 0;
-  flex-shrink: 0;
-}
-.game-molkky .brand h1 .dot { color: var(--moss); }
-.game-molkky .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.game-molkky .header-actions::-webkit-scrollbar { display: none; }
-.game-molkky .icon-btn-sm {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-soft);
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.game-molkky .icon-btn-sm:active { transform: scale(0.92); }
 .game-molkky .theme-toggle {
   background: none;
   border: 1px solid var(--line);
@@ -123,12 +108,6 @@
   border-radius: 18px;
   padding: 18px;
   box-shadow: 0 2px 10px var(--shadow);
-}
-.game-molkky .empty {
-  text-align: center;
-  color: var(--ink-soft);
-  padding: 30px 10px;
-  font-size: 0.9rem;
 }
 .game-molkky .primary-btn {
   width: 100%;
@@ -156,111 +135,6 @@
   margin-top: 10px;
 }
 
-.game-molkky .scoreboard {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 2px 2px 12px;
-  margin-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
-}
-.game-molkky .scoreboard::-webkit-scrollbar { display: none; }
-.game-molkky .chip {
-  position: relative;
-  flex-shrink: 0;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 8px 12px 4px;
-  min-width: 84px;
-  text-align: center;
-  touch-action: pan-x;
-}
-.game-molkky .chip.active { background: var(--moss); border-color: var(--moss); }
-.game-molkky .chip.active .chip-name, .game-molkky .chip.active .chip-score { color: var(--moss-ink); }
-.game-molkky .chip-remove {
-  position: absolute;
-  top: 2px;
-  right: 4px;
-  background: transparent;
-  border: none;
-  color: var(--ink-soft);
-  opacity: 0.4;
-  font-size: 0.8rem;
-  line-height: 1;
-  padding: 2px 4px;
-  cursor: pointer;
-}
-.game-molkky .chip.active .chip-remove { color: var(--moss-ink); }
-.game-molkky .chip-remove:active { opacity: 0.85; }
-.game-molkky .chip-add {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: 74px;
-  background: transparent;
-  border: 1px dashed var(--line);
-  color: var(--ink-soft);
-  opacity: 0.7;
-  font-family: inherit;
-  cursor: pointer;
-}
-.game-molkky .chip-add:active { background: var(--surface-2); opacity: 0.9; }
-.game-molkky .chip-add-icon { font-size: 1.2rem; line-height: 1; }
-.game-molkky .chip-add-label { font-size: 10.5px; }
-.game-molkky .chip.dragging {
-  position: relative;
-  z-index: 5;
-  box-shadow: 0 10px 24px var(--shadow);
-  border-color: var(--amber);
-}
-.game-molkky .chip-drag {
-  display: block;
-  margin: 4px auto 0;
-  width: 28px;
-  cursor: grab;
-  touch-action: none;
-  font-size: 11px;
-  line-height: 1;
-  opacity: 0.35;
-  color: var(--ink-soft);
-}
-.game-molkky .chip.active .chip-drag { color: var(--moss-ink); }
-.game-molkky .chip-drag:active { cursor: grabbing; opacity: 0.8; }
-.game-molkky .chip-name {
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90px;
-  margin: 0 0 2px;
-  cursor: pointer;
-  border-bottom: 1px dotted transparent;
-}
-.game-molkky .chip-name:hover { border-bottom-color: var(--ink-soft); }
-.game-molkky .chip.active .chip-name:hover { border-bottom-color: var(--moss-ink); }
-.game-molkky .chip-name-input {
-  display: block;
-  width: 74px;
-  max-width: 90px;
-  margin: 0 auto 2px;
-  font-family: inherit;
-  font-size: 11.5px;
-  text-align: center;
-  color: var(--ink);
-  background: var(--surface-2);
-  border: 1px solid var(--moss);
-  border-radius: 6px;
-  padding: 2px 4px;
-}
-.game-molkky .chip-score {
-  font-family: 'Fraunces', serif;
-  font-weight: 600;
-  font-size: 20px;
-}
 .game-molkky .chip-miss-dots { display: flex; gap: 3px; justify-content: center; margin-top: 5px; }
 .game-molkky .chip-miss-dot {
   width: 5px; height: 5px; border-radius: 50%;
@@ -384,31 +258,6 @@
   font-size: 13px;
 }
 .game-molkky .multi-btn.miss-tile:active { background: var(--red); color: var(--surface); }
-
-.game-molkky .log-toggle {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--ink-soft);
-  font-family: inherit;
-  font-size: 13px;
-  padding: 6px 2px;
-  cursor: pointer;
-}
-.game-molkky .log { display: none; flex-direction: column; gap: 6px; margin-top: 6px; }
-.game-molkky .log.open { display: flex; }
-.game-molkky .log-item {
-  font-size: 13px;
-  color: var(--ink-soft);
-  padding: 8px 12px;
-  background: var(--surface);
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  display: flex;
-  justify-content: space-between;
-}
-.game-molkky .log-item b { color: var(--ink); font-weight: 600; }
 
 .game-molkky .winner-card {
   text-align: center;

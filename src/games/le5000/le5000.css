@@ -1,3 +1,5 @@
+@import '../../shared/game-ui.css';
+
 .game-le5000{
   --felt-900:#0f2a20;
   --felt-800:#173d2d;
@@ -12,6 +14,26 @@
   --ivory:#fbf8f2;
   --line: rgba(244,236,216,0.14);
   color-scheme: dark;
+
+  /* shared game-ui.css tokens */
+  --ui-surface: rgba(255,255,255,0.05);
+  --ui-surface-2: rgba(255,255,255,0.08);
+  --ui-line: var(--line);
+  --ui-ink: var(--ivory);
+  --ui-ink-soft: rgba(244,236,216,0.75);
+  --ui-accent: var(--gold-bright);
+  --ui-active-bg: rgba(217,164,65,0.14);
+  --ui-active-border: var(--gold-dim);
+  --ui-active-ink: var(--ivory);
+  --ui-drag-border: var(--gold);
+  --ui-heading-color: var(--gold);
+  --ui-score-font: 'Fredoka', sans-serif;
+  --ui-score-size: 1.15rem;
+  --ui-chip-min-width: 92px;
+  --ui-shadow: rgba(0,0,0,0.4);
+  --ui-danger: #e6a49e;
+  --ui-danger-border: rgba(192,72,63,0.35);
+  --ui-success: #b7d9b0;
 
   display: block;
   min-height: 100%;
@@ -32,54 +54,11 @@
   padding-bottom: 40px;
 }
 
-.game-le5000 .brand{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 20px 4px 18px;
-}
-.game-le5000 .brand h1{
-  font-family:'Fredoka', system-ui, sans-serif;
-  font-weight:700;
-  font-size: 1.45rem;
-  margin:0;
-  color: var(--gold);
-  flex-shrink:0;
-}
-.game-le5000 .brand h1 .dot{ color: var(--gold-bright); }
-.game-le5000 .header-actions{
-  display:flex;
-  align-items:center;
-  gap: 6px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.game-le5000 .header-actions::-webkit-scrollbar{ display:none; }
 .game-le5000 .round-chip{
   font-size: 0.72rem;
   opacity: 0.65;
   white-space: nowrap;
   padding: 0 4px;
-}
-.game-le5000 .icon-btn-sm{
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.05);
-  color: var(--cream);
-  font-size: 15px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor: pointer;
-}
-.game-le5000 .icon-btn-sm:active{ background: rgba(255,255,255,0.11); transform: scale(0.92); }
-.game-le5000 .icon-btn-sm.danger{
-  color: #e6a49e;
-  border-color: rgba(192,72,63,0.35);
 }
 
 .game-le5000 .winner-banner{
@@ -94,85 +73,6 @@
   box-shadow: 0 6px 20px rgba(217,164,65,0.25);
 }
 
-/* ---- Scoreboard (chips, one per player) ---- */
-.game-le5000 .scoreboard{
-  display:flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 2px 2px 12px;
-  margin-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
-}
-.game-le5000 .scoreboard::-webkit-scrollbar{ display:none; }
-.game-le5000 .chip{
-  position: relative;
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 8px 12px 4px;
-  min-width: 92px;
-  text-align: center;
-  touch-action: pan-x;
-}
-.game-le5000 .chip.active{
-  background: rgba(217,164,65,0.14);
-  border-color: var(--gold-dim);
-}
-.game-le5000 .chip.dragging{
-  z-index: 5;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.4);
-  border-color: var(--gold);
-}
-.game-le5000 .chip-remove{
-  position: absolute;
-  top: 2px;
-  right: 4px;
-  background: transparent;
-  border: none;
-  color: var(--cream);
-  opacity: 0.35;
-  font-size: 0.85rem;
-  line-height: 1;
-  padding: 2px 4px;
-  cursor: pointer;
-}
-.game-le5000 .chip-remove:active{ opacity: 0.8; }
-.game-le5000 .chip-name{
-  font-size: 11.5px;
-  color: var(--cream);
-  opacity: 0.75;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
-  margin: 4px 0 2px;
-  cursor: pointer;
-  border-bottom: 1px dotted transparent;
-}
-.game-le5000 .chip-name:hover{ border-bottom-color: var(--cream); }
-.game-le5000 .chip-name-input{
-  display:block;
-  width: 84px;
-  max-width: 100px;
-  margin: 4px auto 2px;
-  font-family: inherit;
-  font-size: 11.5px;
-  text-align:center;
-  color: var(--cream);
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--gold-dim);
-  border-radius: 6px;
-  padding: 2px 4px;
-}
-.game-le5000 .chip-score{
-  font-family:'Fredoka', sans-serif;
-  font-weight: 700;
-  font-size: 1.15rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--ivory);
-  margin: 0;
-}
 .game-le5000 .chip-quequettes{
   font-size: 10px;
   color: var(--cream);
@@ -181,27 +81,6 @@
   white-space: nowrap;
 }
 .game-le5000 .chip-quequettes.has-some{ color: #e6a49e; opacity: 0.9; }
-.game-le5000 .chip-drag{
-  display:block;
-  margin: 4px auto 0;
-  width: 36px;
-  cursor: grab;
-  touch-action: none;
-  font-size: 13px;
-  line-height: 1;
-  padding: 6px 0;
-  opacity: 0.35;
-  color: var(--cream);
-}
-.game-le5000 .chip.active .chip-drag{ opacity: 0.55; }
-.game-le5000 .chip-drag:active{ cursor: grabbing; opacity: 0.85; }
-
-.game-le5000 .section-label{
-  font-size: 12.5px;
-  color: var(--cream);
-  opacity: 0.6;
-  margin: 0 0 8px 2px;
-}
 
 .game-le5000 .pending-block{
   text-align: center;
@@ -288,60 +167,6 @@
   opacity: 0.35;
 }
 .game-le5000 .btn-validate:not(:disabled):active{ background: var(--felt-700); }
-
-.game-le5000 .chip-add{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: 78px;
-  background: transparent;
-  border: 1px dashed var(--line);
-  color: var(--cream);
-  opacity: 0.6;
-  font-family: inherit;
-  cursor: pointer;
-}
-.game-le5000 .chip-add:active{ background: rgba(255,255,255,0.05); opacity: 0.85; }
-.game-le5000 .chip-add-icon{ font-size: 1.3rem; line-height: 1; }
-.game-le5000 .chip-add-label{ font-size: 10.5px; }
-
-.game-le5000 .log-toggle{
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--cream);
-  opacity: 0.6;
-  font-family: inherit;
-  font-size: 13px;
-  padding: 6px 2px;
-  cursor: pointer;
-}
-.game-le5000 .log{ display:none; flex-direction: column; gap:6px; margin-top:6px; }
-.game-le5000 .log.open{ display:flex; }
-.game-le5000 .log-item{
-  font-size: 13px;
-  color: var(--cream);
-  opacity: 0.85;
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  display:flex;
-  justify-content: space-between;
-}
-.game-le5000 .delta{ font-variant-numeric: tabular-nums; font-weight: 600; opacity: 1; }
-.game-le5000 .delta.plus{ color: #b7d9b0; }
-.game-le5000 .delta.minus{ color: #e6a49e; }
-
-.game-le5000 .empty{
-  text-align:center;
-  opacity: 0.5;
-  padding: 30px 10px;
-  font-size: 0.9rem;
-}
 
 .game-le5000 .hidden{ display:none !important; }
 
