@@ -18,6 +18,7 @@
   /* shared game-ui.css tokens */
   --ui-surface: rgba(255,255,255,0.05);
   --ui-surface-2: rgba(255,255,255,0.08);
+  --ui-modal-bg: var(--felt-800);
   --ui-line: var(--line);
   --ui-ink: var(--ivory);
   --ui-ink-soft: rgba(244,236,216,0.75);
