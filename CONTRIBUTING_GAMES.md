@@ -9,7 +9,9 @@ Depuis la refonte en brique partagée, ce socle n'est plus qu'une convention à 
 - `src/shared/game-ui.css` — styles structurels du header, du scoreboard, de l'historique des coups et de l'historique des parties, pilotés par les variables `--ui-*` que chaque jeu définit sous son propre `.game-<id>` (couleurs/polices uniquement — jamais de mise en page ici).
 - `.game-root` — classe posée par le shell (`src/shell/app.js`) sur le conteneur de chaque jeu monté ; c'est elle que `game-ui.css` cible, pas `.game-<id>`. Un jeu n'a rien à faire pour l'obtenir.
 
-Mölkky, Le 5000 et Compteur libre (`src/games/*/`) sont les trois implémentations de référence : en cas de doute, regarder comment elles branchent `createPlayerBoard` et `createGamesHistory`.
+Mölkky, Le 5000 et Compteur libre (`src/games/*/`) sont les implémentations de référence pour `createPlayerBoard` : en cas de doute, regarder comment elles le branchent avec `createGamesHistory`.
+
+Jass (`src/games/jass/`) est différent : ce n'est pas une liste ouverte de joueurs mais 2 équipes fixes de 2, donc il n'utilise pas `createPlayerBoard` (ajout/suppression/glissé-déposé n'ont pas de sens ici) — juste `attachLogToggle` et `createGamesHistory`, avec sa propre UI d'équipes. Un jeu n'est pas obligé d'utiliser `createPlayerBoard` si sa structure de joueurs ne correspond pas au modèle "liste ouverte" ; le reste de la charte (disposition, historique des parties, persistance) s'applique quand même.
 
 ## Disposition de l'écran de jeu
 

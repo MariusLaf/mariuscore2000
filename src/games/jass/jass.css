@@ -1,0 +1,257 @@
+@import '../../shared/game-ui.css';
+
+.game-jass {
+  --bg: #16231C;
+  --surface: #223229;
+  --surface-2: #2C3F33;
+  --ink: #EDEAE0;
+  --ink-soft: #A9B3A8;
+  --line: #3C5245;
+  --wood: #8B5A2B;
+  --danger: #C0483F;
+  --danger-soft: rgba(192,72,63,0.3);
+  --success: #7BC47F;
+
+  --zone-red: #C0483F;
+  --zone-yellow: #D9A441;
+  --zone-green: #4CAF6E;
+  --zone-purple: #8C6FCB;
+  --zone-blue: #4C8FD1;
+
+  /* shared game-ui.css tokens */
+  --ui-surface: var(--surface);
+  --ui-surface-2: var(--surface-2);
+  --ui-line: var(--line);
+  --ui-ink: var(--ink);
+  --ui-ink-soft: var(--ink-soft);
+  --ui-accent: var(--zone-yellow);
+  --ui-active-bg: var(--zone-yellow);
+  --ui-active-border: var(--zone-yellow);
+  --ui-active-ink: #1B2B22;
+  --ui-danger: var(--danger);
+  --ui-danger-border: var(--danger-soft);
+  --ui-success: var(--success);
+
+  display: block;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.game-jass * { box-sizing: border-box; }
+
+.game-jass .wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 18px 40px;
+  min-height: 100%;
+}
+
+/* ---- Team panel / ardoise ---- */
+.game-jass .team-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 14px 16px;
+  margin-bottom: 14px;
+}
+.game-jass .team-names {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.game-jass .team-name-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.game-jass .team-and { color: var(--ink-soft); font-size: 0.85rem; }
+.game-jass .team-score {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 2.4rem;
+  line-height: 1;
+  text-align: center;
+  color: var(--ink);
+  margin: 4px 0 10px;
+}
+
+.game-jass .ardoise {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 6px;
+  background: #0F1912;
+  border: 6px solid var(--wood);
+  border-radius: 6px;
+  padding: 10px;
+  background-image: radial-gradient(circle at 15% 10%, rgba(255,255,255,0.03) 0%, transparent 50%);
+}
+.game-jass .ardoise-zone {
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 46px;
+}
+.game-jass .zone-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+.game-jass .zone-value {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.game-jass .zone-red { grid-column: 1; grid-row: 1 / 3; background: color-mix(in srgb, var(--zone-red) 22%, transparent); align-items: center; }
+.game-jass .zone-red .zone-value { font-size: 2.4rem; color: var(--zone-red); }
+.game-jass .zone-yellow { grid-column: 2; grid-row: 1; background: color-mix(in srgb, var(--zone-yellow) 20%, transparent); }
+.game-jass .zone-green { grid-column: 2; grid-row: 2; background: color-mix(in srgb, var(--zone-green) 20%, transparent); }
+.game-jass .zone-purple { grid-column: 1; grid-row: 3; background: color-mix(in srgb, var(--zone-purple) 22%, transparent); align-items: center; }
+.game-jass .zone-purple .zone-value { color: var(--zone-purple); font-size: 1.3rem; }
+.game-jass .zone-blue { grid-column: 2; grid-row: 3; background: color-mix(in srgb, var(--zone-blue) 20%, transparent); }
+
+.game-jass .tally-svg { height: 24px; width: auto; }
+.game-jass .tally-yellow line { stroke: var(--zone-yellow); stroke-width: 2; }
+.game-jass .tally-green line { stroke: var(--zone-green); stroke-width: 2; }
+.game-jass .tally-blue line { stroke: var(--zone-blue); stroke-width: 2; }
+.game-jass .tally-empty { color: var(--ink-soft); opacity: 0.5; font-size: 0.85rem; }
+
+/* ---- Round entry ---- */
+.game-jass .round-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+.game-jass .section-label {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 0 0 10px 2px;
+}
+.game-jass .round-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.game-jass .round-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.game-jass .round-field-label {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-jass .round-field input {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.game-jass .primary-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--zone-yellow);
+  color: #1B2B22;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.game-jass .primary-btn:active { transform: scale(0.99); }
+
+/* ---- Modals ---- */
+.game-jass .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 60;
+}
+.game-jass .modal-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.game-jass .modal-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 10px;
+  text-align: center;
+}
+.game-jass .modal-message {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.game-jass .legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+.game-jass .legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.game-jass .swatch-red { background: var(--zone-red); }
+.game-jass .swatch-yellow { background: var(--zone-yellow); }
+.game-jass .swatch-green { background: var(--zone-green); }
+.game-jass .swatch-purple { background: var(--zone-purple); }
+.game-jass .swatch-blue { background: var(--zone-blue); }
+.game-jass .modal-ok {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: var(--zone-yellow);
+  color: #1B2B22;
+}
+
+.game-jass .hidden { display: none !important; }
