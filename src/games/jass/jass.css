@@ -56,6 +56,10 @@
   border-radius: 16px;
   padding: 14px 14px 16px;
   margin-bottom: 14px;
+  overflow: hidden;
+}
+.game-jass .team-panel-mirrored .mirror-inner {
+  transform: rotate(180deg);
 }
 .game-jass .team-names {
   display: flex;
@@ -132,61 +136,38 @@
 .game-jass .tally-blue line { stroke: var(--zone-blue); stroke-width: 2; }
 .game-jass .tally-empty { color: var(--ink-soft); opacity: 0.5; font-size: 0.85rem; }
 
-/* ---- Round entry ---- */
-.game-jass .round-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 18px;
-}
-.game-jass .section-label {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  margin: 0 0 10px 2px;
-}
-.game-jass .round-row {
+/* ---- Round entry (inline, per team panel) ---- */
+.game-jass .round-entry {
   display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-top: 12px;
 }
-.game-jass .round-field {
+.game-jass .round-entry input {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.game-jass .round-field-label {
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.game-jass .round-field input {
+  min-width: 0;
   background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--ink);
   border-radius: 10px;
-  padding: 12px;
+  padding: 11px 12px;
   font-family: inherit;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-.game-jass .primary-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
+.game-jass .round-entry button {
+  flex-shrink: 0;
+  padding: 11px 16px;
+  border-radius: 10px;
   border: none;
   background: var(--zone-yellow);
   color: #1B2B22;
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
-.game-jass .primary-btn:active { transform: scale(0.99); }
+.game-jass .round-entry button:active { transform: scale(0.97); }
 
 /* ---- Modals ---- */
 .game-jass .modal-overlay {
