@@ -274,66 +274,6 @@
 
 .game-molkky .placement-card { max-width: 320px; }
 
-.game-molkky .history-card { max-width: 360px; text-align: left; }
-.game-molkky .history-card .modal-title { text-align: center; }
-.game-molkky .history-list {
-  max-height: 340px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 10px 0 16px;
-}
-.game-molkky .history-empty {
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 13.5px;
-  padding: 20px 10px;
-}
-.game-molkky .history-item {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-.game-molkky .history-item-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-.game-molkky .history-date { font-size: 11px; color: var(--ink-soft); }
-.game-molkky .history-delete {
-  background: none;
-  border: none;
-  color: var(--ink-soft);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 2px 4px;
-}
-.game-molkky .history-players {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 13px;
-}
-.game-molkky .history-player {
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-}
-.game-molkky .history-player.winner {
-  background: var(--moss);
-  border-color: var(--moss);
-  color: var(--moss-ink);
-  font-weight: 600;
-}
-.game-molkky .history-actions { display: flex; gap: 8px; }
-.game-molkky .history-actions .modal-ok { flex: 1; }
-.game-molkky .history-actions .secondary-btn { flex: 1; margin-top: 0; }
 .game-molkky .placement-svg {
   width: 100%;
   height: auto;

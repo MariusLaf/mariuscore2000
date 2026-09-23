@@ -1,4 +1,5 @@
 import { createPlayerBoard, attachLogToggle } from '../../shared/player-board.js';
+import { createGamesHistory, pickLeader } from '../../shared/games-history.js';
 
 const MARKUP = `
 <div class="wrap">
@@ -6,7 +7,7 @@ const MARKUP = `
   <div class="brand">
     <h1>Mölkky<span class="dot">.</span></h1>
     <div class="header-actions" id="headerActions">
-      <button class="icon-btn-sm" id="historyBtn" title="Historique des parties">🕓</button>
+      <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm hidden" id="placementBtn" title="Placement de départ des quilles">📐</button>
       <button class="icon-btn-sm hidden" id="undoBtn" title="Annuler le dernier lancer">↩︎</button>
       <button class="icon-btn-sm hidden" id="rematchBtn" title="Réinitialiser (mêmes joueurs)">🔁</button>
@@ -82,17 +83,6 @@ const MARKUP = `
   </div>
 </div>
 
-<div id="historyOverlay" class="modal-overlay hidden">
-  <div class="modal-card history-card">
-    <h3 class="modal-title">Historique des parties</h3>
-    <div class="history-list" id="historyList"></div>
-    <div class="history-actions">
-      <button class="secondary-btn" id="clearHistoryBtn">Vider l'historique</button>
-      <button class="modal-ok" id="historyClose">Fermer</button>
-    </div>
-  </div>
-</div>
-
 <div id="modalOverlay" class="modal-overlay hidden">
   <div class="modal-card">
     <p class="modal-icon" id="modalIcon">⚠️</p>
@@ -112,6 +102,11 @@ export default function initMolkky(container) {
   const STORAGE_KEY = 'molkky-state-v1';
   const THEME_KEY = 'molkky-theme';
   const GAMES_HISTORY_KEY = 'molkky-games-history-v1';
+  const gamesHistory = createGamesHistory({
+    container,
+    button: container.querySelector('#gamesHistoryBtn'),
+    storageKey: GAMES_HISTORY_KEY
+  });
 
   let state = loadState() || freshState();
   let history = []; // stack of state snapshots for undo
@@ -138,27 +133,6 @@ export default function initMolkky(container) {
   function pushHistory() {
     history.push(JSON.parse(JSON.stringify(state)));
     if (history.length > 100) history.shift();
-  }
-
-  // ---------- GAME HISTORY (finished games) ----------
-  function loadGamesHistory() {
-    try {
-      const raw = localStorage.getItem(GAMES_HISTORY_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) { return []; }
-  }
-  function saveGamesHistory(list) {
-    try { localStorage.setItem(GAMES_HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
-  }
-  function recordFinishedGame(winnerName) {
-    const list = loadGamesHistory();
-    list.unshift({
-      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-      date: new Date().toISOString(),
-      winnerName: winnerName,
-      players: state.players.map(p => ({ name: p.name, score: p.score }))
-    });
-    saveGamesHistory(list.slice(0, 100));
   }
 
   // ---------- THEME ----------
@@ -206,11 +180,6 @@ export default function initMolkky(container) {
   const placementBtn = container.querySelector('#placementBtn');
   const placementOverlay = container.querySelector('#placementOverlay');
   const placementClose = container.querySelector('#placementClose');
-  const historyBtn = container.querySelector('#historyBtn');
-  const historyOverlay = container.querySelector('#historyOverlay');
-  const historyClose = container.querySelector('#historyClose');
-  const historyList = container.querySelector('#historyList');
-  const clearHistoryBtn = container.querySelector('#clearHistoryBtn');
 
   let pendingResolve = null;
   function showPenaltyModal(icon, title, message, onResolve) {
@@ -231,68 +200,6 @@ export default function initMolkky(container) {
 
   placementBtn.addEventListener('click', () => placementOverlay.classList.remove('hidden'));
   placementClose.addEventListener('click', () => placementOverlay.classList.add('hidden'));
-
-  const dateFormatter = new Intl.DateTimeFormat('fr-CH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-
-  function renderHistoryList() {
-    const games = loadGamesHistory();
-    historyList.innerHTML = '';
-    if (games.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'history-empty';
-      empty.textContent = 'Aucune partie terminée pour l\'instant.';
-      historyList.appendChild(empty);
-      return;
-    }
-    games.forEach(game => {
-      const item = document.createElement('div');
-      item.className = 'history-item';
-
-      const top = document.createElement('div');
-      top.className = 'history-item-top';
-      const date = document.createElement('span');
-      date.className = 'history-date';
-      let dateLabel = game.date;
-      try { dateLabel = dateFormatter.format(new Date(game.date)); } catch (e) {}
-      date.textContent = dateLabel;
-      const del = document.createElement('button');
-      del.className = 'history-delete';
-      del.textContent = '×';
-      del.setAttribute('aria-label', 'Supprimer cette partie');
-      del.addEventListener('click', () => {
-        saveGamesHistory(loadGamesHistory().filter(g => g.id !== game.id));
-        renderHistoryList();
-      });
-      top.appendChild(date);
-      top.appendChild(del);
-
-      const players = document.createElement('div');
-      players.className = 'history-players';
-      game.players
-        .slice()
-        .sort((a, b) => b.score - a.score)
-        .forEach(p => {
-          const tag = document.createElement('span');
-          tag.className = 'history-player' + (p.name === game.winnerName ? ' winner' : '');
-          tag.textContent = p.name + ' ' + p.score;
-          players.appendChild(tag);
-        });
-
-      item.appendChild(top);
-      item.appendChild(players);
-      historyList.appendChild(item);
-    });
-  }
-
-  historyBtn.addEventListener('click', () => {
-    renderHistoryList();
-    historyOverlay.classList.remove('hidden');
-  });
-  historyClose.addEventListener('click', () => historyOverlay.classList.add('hidden'));
-  clearHistoryBtn.addEventListener('click', () => {
-    saveGamesHistory([]);
-    renderHistoryList();
-  });
 
   // build 1..12 single-quille grid once
   for (let n = 1; n <= 12; n++) {
@@ -332,7 +239,16 @@ export default function initMolkky(container) {
   rematchBtn.addEventListener('click', rematchSamePlayers);
   playAgainBtnSame.addEventListener('click', rematchSamePlayers);
 
+  function maybeRecordUnfinishedGame() {
+    if (state.phase !== 'playing') return; // no active game, or already recorded via a win
+    if (state.players.length === 0) return;
+    const hasActivity = state.players.some(p => p.score > 0 || p.misses > 0) || state.log.length > 0;
+    if (!hasActivity) return;
+    gamesHistory.record(pickLeader(state.players).name, state.players);
+  }
+
   function resetToSetup() {
+    maybeRecordUnfinishedGame();
     state = freshState();
     history = [];
     saveState();
@@ -340,6 +256,7 @@ export default function initMolkky(container) {
   }
 
   function rematchSamePlayers() {
+    maybeRecordUnfinishedGame();
     state.players = state.players.map(p => ({ name: p.name, score: 0, misses: 0 }));
     state.currentIndex = 0;
     state.phase = 'playing';
@@ -427,7 +344,7 @@ export default function initMolkky(container) {
     if (player.score === 50) {
       state.phase = 'won';
       state.winnerIndex = state.currentIndex;
-      recordFinishedGame(player.name);
+      gamesHistory.record(player.name, state.players);
       saveState();
       render();
       return;

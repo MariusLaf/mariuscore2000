@@ -212,3 +212,110 @@
   padding: 30px 10px;
   font-size: 0.9rem;
 }
+
+/* ---- Games history (finished games, separate from a game's own action log) ---- */
+.game-root .games-history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 70;
+}
+.game-root .games-history-card {
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 40px var(--ui-shadow, rgba(0, 0, 0, 0.35));
+}
+.game-root .games-history-title {
+  font-family: var(--ui-heading-font, inherit);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ui-ink);
+  margin: 0 0 12px;
+  text-align: center;
+}
+.game-root .games-history-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.game-root .history-empty {
+  text-align: center;
+  color: var(--ui-ink-soft);
+  font-size: 13.5px;
+  padding: 20px 10px;
+}
+.game-root .history-item {
+  background: var(--ui-surface-2, var(--ui-surface));
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.game-root .history-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.game-root .history-date { font-size: 11px; color: var(--ui-ink-soft); }
+.game-root .history-delete {
+  background: none;
+  border: none;
+  color: var(--ui-ink-soft);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.game-root .history-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+}
+.game-root .history-player {
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  color: var(--ui-ink-soft);
+}
+.game-root .history-player.winner {
+  background: var(--ui-active-bg);
+  border-color: var(--ui-active-border);
+  color: var(--ui-active-ink);
+  font-weight: 600;
+}
+.game-root .games-history-actions { display: flex; gap: 8px; }
+.game-root .games-history-clear,
+.game-root .games-history-close {
+  flex: 1;
+  border-radius: 12px;
+  padding: 12px 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.game-root .games-history-clear {
+  background: transparent;
+  border: 1px solid var(--ui-line);
+  color: var(--ui-ink-soft);
+}
+.game-root .games-history-close {
+  background: var(--ui-active-bg);
+  border: none;
+  color: var(--ui-active-ink);
+}

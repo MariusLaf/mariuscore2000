@@ -1,10 +1,12 @@
 import { createPlayerBoard, attachLogToggle } from '../../shared/player-board.js';
+import { createGamesHistory, pickLeader } from '../../shared/games-history.js';
 
 const MARKUP = `
 <div class="wrap">
   <div class="brand">
     <h1>Compteur libre<span class="dot">.</span></h1>
     <div class="header-actions">
+      <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm" id="infoBtn" title="Comment ça marche">ℹ️</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler la dernière action">↩︎</button>
       <button class="icon-btn-sm" id="resetScoresBtn" title="Remettre les scores à zéro">🔄</button>
@@ -89,6 +91,12 @@ export default function initLibre(container) {
 
   infoBtn.addEventListener('click', () => infoOverlay.classList.remove('hidden'));
   infoClose.addEventListener('click', () => infoOverlay.classList.add('hidden'));
+
+  const gamesHistory = createGamesHistory({
+    container,
+    button: container.querySelector('#gamesHistoryBtn'),
+    storageKey: 'libre-games-history-v1'
+  });
 
   function escapeAttr(s) { return String(s).replace(/"/g, '&quot;'); }
 
@@ -176,9 +184,16 @@ export default function initLibre(container) {
   container.querySelector('#extraPlusBtn').addEventListener('click', () => adjustExtra(1));
   container.querySelector('#extraMinusBtn').addEventListener('click', () => adjustExtra(-1));
 
+  function maybeRecordGame() {
+    const hasActivity = state.players.some((p) => p.score !== 0 || p.extra !== 0);
+    if (!hasActivity) return;
+    gamesHistory.record(pickLeader(state.players).name, state.players);
+  }
+
   undoBtn.addEventListener('click', undo);
   container.querySelector('#resetScoresBtn').addEventListener('click', () => {
     if (state.players.length === 0) return;
+    maybeRecordGame();
     pushHistory();
     state.players.forEach((p) => { p.score = 0; p.extra = 0; });
     state.log = [];
@@ -186,6 +201,7 @@ export default function initLibre(container) {
     render();
   });
   container.querySelector('#resetAllBtn').addEventListener('click', () => {
+    maybeRecordGame();
     state = { players: [], currentIndex: 0, log: [], history: [] };
     saveState();
     render();

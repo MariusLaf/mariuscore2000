@@ -1,4 +1,5 @@
 import { createPlayerBoard, attachLogToggle } from '../../shared/player-board.js';
+import { createGamesHistory, pickLeader } from '../../shared/games-history.js';
 
 const MARKUP = `
 <div class="wrap">
@@ -6,6 +7,7 @@ const MARKUP = `
     <h1>Le 5000<span class="dot">.</span></h1>
     <div class="header-actions">
       <span class="round-chip" id="roundChip">Manche 1</span>
+      <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm" id="rulesBtn" title="Règles du compteur">ℹ️</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler le dernier tour">↩︎</button>
       <button class="icon-btn-sm" id="resetBtn" title="Nouvelle partie">🔄</button>
@@ -54,10 +56,11 @@ export default function initLe5000(container) {
     catch(e){ /* storage unavailable, continue silently */ }
   }
 
-  let state = loadState() || { players: [], log: [], history: [], currentIndex: 0, round: 1, pending: 0 };
+  let state = loadState() || { players: [], log: [], history: [], currentIndex: 0, round: 1, pending: 0, gameRecorded: false };
   if(typeof state.currentIndex !== 'number') state.currentIndex = 0;
   if(typeof state.round !== 'number') state.round = 1;
   if(typeof state.pending !== 'number') state.pending = 0;
+  if(typeof state.gameRecorded !== 'boolean') state.gameRecorded = false;
   state.pending = Math.max(0, Math.round(state.pending / 100) * 100);
   state.players.forEach(p => { if(typeof p.started !== 'boolean') p.started = p.score > 0; if(typeof p.quequettes !== 'number') p.quequettes = 0; if(typeof p.streak !== 'number') p.streak = 0; });
 
@@ -72,6 +75,12 @@ export default function initLe5000(container) {
 
   rulesBtn.addEventListener('click', () => rulesOverlay.classList.remove('hidden'));
   rulesClose.addEventListener('click', () => rulesOverlay.classList.add('hidden'));
+
+  const gamesHistory = createGamesHistory({
+    container,
+    button: container.querySelector('#gamesHistoryBtn'),
+    storageKey: 'jeu5000-games-history-v1'
+  });
 
   function showConfirm(message, onConfirm){
     const modalZone = container.querySelector('#modalZone');
@@ -165,6 +174,10 @@ export default function initLe5000(container) {
     } else {
       addLog(p.name + ' marque', state.pending);
     }
+    if(!state.gameRecorded && p.score >= 5000){
+      state.gameRecorded = true;
+      gamesHistory.record(p.name, state.players);
+    }
     advanceTurn();
     saveState();
     render();
@@ -194,15 +207,24 @@ export default function initLe5000(container) {
     render();
   }
 
+  function maybeRecordUnfinishedGame(){
+    if(state.gameRecorded) return; // already recorded when someone reached 5000
+    const hasActivity = state.players.some(p => p.score > 0 || p.turns > 0);
+    if(!hasActivity) return;
+    gamesHistory.record(pickLeader(state.players).name, state.players);
+  }
+
   function resetGame(){
     if(state.players.length === 0) return;
     showConfirm('Démarrer une nouvelle partie ? Les scores actuels seront remis à zéro.', () => {
+      maybeRecordUnfinishedGame();
       pushHistorySnapshot();
       state.players.forEach(p => { p.score = 0; p.streak = 0; p.turns = 0; p.started = false; p.quequettes = 0; });
       state.log = [];
       state.currentIndex = 0;
       state.round = 1;
       state.pending = 0;
+      state.gameRecorded = false;
       saveState();
       render();
     });
@@ -210,7 +232,8 @@ export default function initLe5000(container) {
 
   function resetAll(){
     showConfirm('Tout réinitialiser ? Les joueurs seront supprimés et il faudra recommencer la partie de zéro.', () => {
-      state = { players: [], log: [], history: [], currentIndex: 0, round: 1, pending: 0 };
+      maybeRecordUnfinishedGame();
+      state = { players: [], log: [], history: [], currentIndex: 0, round: 1, pending: 0, gameRecorded: false };
       saveState();
       render();
     });
