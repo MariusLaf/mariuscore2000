@@ -79,14 +79,11 @@ export function createPlayerBoard(config) {
     const handle = e.currentTarget;
     const chip = container.children[index];
     if (!chip) return;
-    const rect = chip.getBoundingClientRect();
-    const styles = getComputedStyle(container);
-    const gap = parseFloat(styles.columnGap || styles.gap || '8') || 8;
     dragState = {
       startIndex: index,
       currentIndex: index,
       startX: e.clientX,
-      chipWidth: rect.width + gap,
+      startY: e.clientY,
       chip,
       pointerId: e.pointerId
     };
@@ -97,9 +94,22 @@ export function createPlayerBoard(config) {
   function onChipDragMove(e) {
     if (!dragState || e.pointerId !== dragState.pointerId) return;
     const dx = e.clientX - dragState.startX;
-    dragState.chip.style.transform = `translateX(${dx}px)`;
-    const shift = Math.round(dx / dragState.chipWidth);
-    dragState.currentIndex = Math.min(getPlayers().length - 1, Math.max(0, dragState.startIndex + shift));
+    const dy = e.clientY - dragState.startY;
+    dragState.chip.style.transform = `translate(${dx}px, ${dy}px)`;
+    // Target = the player chip under the pointer (works across wrapped rows)
+    const chips = Array.from(container.children).slice(0, getPlayers().length);
+    const hit = chips.findIndex((c) => {
+      if (c === dragState.chip) return false;
+      const r = c.getBoundingClientRect();
+      return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    if (hit !== -1) dragState.currentIndex = hit;
+    else {
+      const r = chips[dragState.startIndex].getBoundingClientRect();
+      if (e.clientX >= r.left - dx && e.clientX <= r.right - dx && e.clientY >= r.top - dy && e.clientY <= r.bottom - dy) {
+        dragState.currentIndex = dragState.startIndex;
+      }
+    }
   }
 
   function onChipDragEnd(e) {
