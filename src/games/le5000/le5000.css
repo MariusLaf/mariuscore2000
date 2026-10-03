@@ -55,6 +55,16 @@
   padding-bottom: 40px;
 }
 
+/* Wrap players onto several rows instead of a horizontal swipe */
+.game-le5000 .scoreboard{
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+.game-le5000 .scoreboard .chip{
+  flex: 1 1 var(--ui-chip-min-width);
+  touch-action: manipulation;
+}
+
 .game-le5000 .round-chip{
   font-size: 0.72rem;
   opacity: 0.65;
