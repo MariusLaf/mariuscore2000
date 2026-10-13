@@ -1,47 +1,47 @@
 @import '../../shared/game-ui.css';
 
+/* Palette tirée de la boîte Flip 7 : fond turquoise, contours bleu nuit, cartes crème, accents jaune/orange/corail/bleu */
 .game-flip7{
-  --felt-900:#2a0f1d;
-  --felt-800:#3d1730;
-  --felt-700:#52203f;
-  --felt-600:#7a2f5d;
-  --cream:#f4ecd8;
-  --gold:#e0568a;
-  --gold-dim:#a83c68;
-  --gold-bright:#ff86b0;
-  --red:#c0483f;
-  --red-dim:#8a352e;
-  --ivory:#fbf8f2;
-  --line: rgba(244,236,216,0.14);
-  color-scheme: dark;
+  --navy:#2b2a7c;
+  --navy-soft:rgba(43,42,124,0.7);
+  --teal-top:#8fd8da;
+  --teal-bottom:#2aa3a6;
+  --cream:#fff6dc;
+  --yellow:#fcd63c;
+  --orange:#f58a2e;
+  --coral:#ee5a5f;
+  --blue:#4f8fd9;
+  --green:#a8c93a;
+  --line: rgba(43,42,124,0.28);
+  color-scheme: light;
 
   /* shared game-ui.css tokens */
-  --ui-surface: rgba(255,255,255,0.05);
-  --ui-surface-2: rgba(255,255,255,0.08);
-  --ui-modal-bg: var(--felt-800);
+  --ui-surface: var(--cream);
+  --ui-surface-2: #ffeeba;
+  --ui-modal-bg: var(--cream);
   --ui-line: var(--line);
-  --ui-ink: var(--ivory);
-  --ui-ink-soft: rgba(244,236,216,0.75);
-  --ui-accent: var(--gold-bright);
-  --ui-active-bg: rgba(224,86,138,0.14);
-  --ui-active-border: var(--gold-dim);
-  --ui-active-ink: var(--ivory);
-  --ui-drag-border: var(--gold);
-  --ui-heading-color: var(--gold);
+  --ui-ink: var(--navy);
+  --ui-ink-soft: var(--navy-soft);
+  --ui-accent: var(--orange);
+  --ui-active-bg: var(--yellow);
+  --ui-active-border: var(--navy);
+  --ui-active-ink: var(--navy);
+  --ui-drag-border: var(--orange);
+  --ui-heading-color: var(--yellow);
   --ui-score-font: 'Fredoka', sans-serif;
-  --ui-score-size: 1.15rem;
+  --ui-score-size: 1.25rem;
   --ui-chip-min-width: 92px;
-  --ui-shadow: rgba(0,0,0,0.4);
-  --ui-danger: #e6a49e;
-  --ui-danger-border: rgba(192,72,63,0.35);
-  --ui-success: #b7d9b0;
+  --ui-shadow: rgba(43,42,124,0.35);
+  --ui-danger: #b3262d;
+  --ui-danger-border: rgba(179,38,45,0.4);
+  --ui-success: #3d7a1f;
 
   display: block;
   min-height: 100%;
   margin:0;
-  background: radial-gradient(ellipse at top, var(--felt-700) 0%, var(--felt-900) 70%);
+  background: linear-gradient(180deg, var(--teal-top) 0%, var(--teal-bottom) 100%);
   background-attachment: fixed;
-  color: var(--cream);
+  color: var(--navy);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   padding-left: 14px;
@@ -49,224 +49,142 @@
 }
 .game-flip7 *{box-sizing:border-box;}
 
-.game-flip7 .wrap{
-  max-width: 560px;
-  margin: 0 auto;
-  padding-bottom: 40px;
+.game-flip7 .wrap{ max-width: 560px; margin: 0 auto; padding-bottom: 40px; }
+
+/* Titre façon logo : jaune, contour bleu nuit */
+.game-flip7 .brand h1{
+  color: var(--yellow);
+  -webkit-text-stroke: 1.5px var(--navy);
+  paint-order: stroke fill;
+  text-shadow: 2px 3px 0 var(--navy);
+  letter-spacing: 0.02em;
 }
 
-/* Wrap players onto several rows instead of a horizontal swipe */
-.game-flip7 .scoreboard{
-  flex-wrap: wrap;
-  overflow-x: visible;
-}
+.game-flip7 .scoreboard{ flex-wrap: wrap; overflow-x: visible; }
 .game-flip7 .scoreboard .chip{
   flex: 1 1 var(--ui-chip-min-width);
   touch-action: manipulation;
+  background: var(--cream);
+  border: 2px solid var(--navy);
+  box-shadow: 0 3px 0 var(--navy);
+  color: var(--navy);
 }
+.game-flip7 .chip-add{ background: rgba(255,246,220,0.45); border-style: dashed; box-shadow: none; }
 
 .game-flip7 .round-chip{
-  font-size: 0.72rem;
-  opacity: 0.65;
-  white-space: nowrap;
-  padding: 0 4px;
+  font-size: 0.72rem; font-weight: 700; white-space: nowrap; padding: 3px 8px;
+  background: var(--navy); color: var(--cream); border-radius: 999px;
 }
 
 .game-flip7 .winner-banner{
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: var(--felt-900);
-  border-radius: 16px;
-  padding: 14px 16px;
-  font-family:'Fredoka', sans-serif;
-  font-weight:600;
-  font-size: 1.02rem;
+  background: var(--yellow); color: var(--navy); border: 2px solid var(--navy);
+  box-shadow: 0 4px 0 var(--navy);
+  border-radius: 16px; padding: 14px 16px;
+  font-family:'Fredoka', sans-serif; font-weight:600; font-size: 1.02rem;
   margin: 0 4px 16px;
-  box-shadow: 0 6px 20px rgba(224,86,138,0.25);
 }
 
+.game-flip7 .empty{ text-align:center; color: var(--navy); opacity:.8; padding:24px 0; }
+.game-flip7 .round-title{ text-align:center; font-size:.8rem; font-weight:600; color:var(--navy); opacity:.8; margin:8px 0 12px; }
 
-.game-flip7 .chip-stat{ font-size:10px; opacity:.45; margin:3px 0 0; white-space:nowrap; }
-.game-flip7 .chip-stat.has-some{ color: var(--gold-bright); opacity:.9; }
-.game-flip7 .empty{ text-align:center; opacity:.7; padding:24px 0; }
-.game-flip7 .round-title{ text-align:center; font-size:.8rem; opacity:.75; margin:4px 0 10px; }
-.game-flip7 .entry-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
-.game-flip7 .entry{
-  display:grid; grid-template-columns: auto 1fr auto; gap:10px; align-items:center; width:100%; text-align:left;
-  background: rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:12px; padding:8px 12px;
-  color:inherit; font:inherit; cursor:pointer;
+/* bouton de saisie dans la tuile joueur */
+.game-flip7 .chip-entry{
+  margin-top:6px; width:100%; min-height:34px; border-radius:10px;
+  border:2px dashed var(--navy); background:rgba(79,143,217,.15); color:var(--navy);
+  font-family:'Fredoka',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer;
 }
-.game-flip7 .entry.is-bust{ border-color: rgba(192,72,63,.5); background: rgba(192,72,63,.12); }
-.game-flip7 .entry.is-flip{ border-color: var(--gold); background: rgba(224,86,138,.16); }
-.game-flip7 .entry-name{ font-family:'Fredoka',sans-serif; font-weight:600; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.game-flip7 .entry-sum{ font-size:.75rem; opacity:.65; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.game-flip7 .entry-total{ font-family:'Fredoka',sans-serif; font-weight:800; font-size:1.2rem; color:var(--gold-bright); font-variant-numeric:tabular-nums; }
-.game-flip7 .is-bust .entry-total{ color:#e6a49e; }
-.game-flip7 .step-btn{
-  width:44px; height:44px; border-radius:12px; border:1px solid var(--gold-dim);
-  background: rgba(224,86,138,.12); color:var(--gold-bright); font-size:1.3rem; font-weight:700; cursor:pointer;
-}
-.game-flip7 .pts-input{
-  width:80px; height:44px; text-align:center; border-radius:12px; border:1px solid var(--line);
-  background: rgba(0,0,0,.25); color:var(--ivory); font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.2rem;
-}
-.game-flip7 .toggle{
-  border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--cream);
-  padding:10px 12px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:.85rem; cursor:pointer;
-}
-.game-flip7 .toggle-flip.on{ background: var(--gold); border-color: var(--gold); color: var(--felt-900); }
+.game-flip7 .chip-entry.has-entry{ border-style:solid; background:var(--blue); color:#fff; }
+.game-flip7 .chip-entry.is-bust{ background:var(--coral); color:#fff; }
+.game-flip7 .chip-entry.is-flip{ background:var(--yellow); color:var(--navy); }
 
-/* ---- Card entry sheet ---- */
-.game-flip7 .sheet-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:90; }
-.game-flip7 .sheet{
-  width:100%; max-width:560px; background: var(--felt-800); border-top:1px solid var(--line);
-  border-radius:20px 20px 0 0; padding:12px 14px calc(14px + env(safe-area-inset-bottom));
-}
-.game-flip7 .sheet-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.game-flip7 .sheet-player{ font-family:'Fredoka',sans-serif; font-weight:600; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.game-flip7 .sheet-tabs{ display:flex; background:rgba(0,0,0,.25); border-radius:999px; padding:3px; }
-.game-flip7 .sheet-tab{ border:none; background:none; color:var(--cream); padding:7px 14px; border-radius:999px; font-weight:600; font-size:.8rem; cursor:pointer; }
-.game-flip7 .sheet-tab.on{ background:var(--ivory); color:var(--felt-900); }
-.game-flip7 .sheet-clear{ border:none; background:none; color:var(--cream); font-size:1.3rem; opacity:.7; width:36px; cursor:pointer; }
-.game-flip7 .sheet-total{ text-align:center; font-family:'Fredoka',sans-serif; font-weight:800; font-size:2.4rem; line-height:1.1; color:var(--gold-bright); }
-.game-flip7 .sheet-count{ text-align:center; font-size:.8rem; opacity:.7; margin-bottom:8px; min-height:1.1em; }
-.game-flip7 .num-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
-.game-flip7 .num, .game-flip7 .mod{
-  height:46px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.07);
-  color:var(--ivory); font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.05rem; cursor:pointer;
-}
-.game-flip7 .num.on, .game-flip7 .mod.on{ background:var(--gold); border-color:var(--gold); color:var(--felt-900); }
-.game-flip7 .mod-row{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:10px; }
-.game-flip7 .mod{ height:40px; font-size:.9rem; }
-.game-flip7 .manual{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
-.game-flip7 .manual-quick{ display:flex; justify-content:center; gap:8px; margin-bottom:10px; }
-.game-flip7 .sheet-actions{ display:flex; gap:10px; }
-.game-flip7 .sheet-actions .btn{ padding:12px 8px; }
-.game-flip7 .btn-bust{ background:rgba(192,72,63,.18); color:#e6a49e; border:1px solid rgba(192,72,63,.4); }
-.game-flip7 .btn-bust.on{ background:var(--red); color:var(--ivory); }
-.game-flip7 .btn-validate:disabled{ opacity:.35; }
-.game-flip7 .main-actions{
-  display:flex;
-  gap: 10px;
-  margin-bottom: 18px;
-}
+.game-flip7 .main-actions{ display:flex; gap:10px; margin-bottom:18px; }
 .game-flip7 .btn{
-  flex:1;
-  border: none;
-  border-radius: 14px;
-  padding: 14px 8px;
-  font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
+  flex:1; border:2px solid var(--navy); border-radius:14px; padding:14px 8px;
+  font-family:'Fredoka',sans-serif; font-weight:600; font-size:1rem; cursor:pointer;
+  box-shadow: 0 3px 0 var(--navy);
 }
-.game-flip7 .btn-bust-unused{
-  background: rgba(192,72,63,0.18);
-  color: #e6a49e;
-  border: 1px solid rgba(192,72,63,0.4);
-}
-.game-flip7 .btn-bust:active{ background: rgba(192,72,63,0.3); }
-.game-flip7 .btn-validate{
-  background: var(--felt-600);
-  color: var(--ivory);
-  border: 1px solid rgba(244,236,216,0.25);
-}
-.game-flip7 .btn-validate:disabled{
-  opacity: 0.35;
-}
-.game-flip7 .btn-validate:not(:disabled):active{ background: var(--felt-700); }
+.game-flip7 .btn:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--navy); }
+.game-flip7 .btn-validate{ background: var(--orange); color: var(--navy); }
+.game-flip7 .btn-bust{ background: var(--cream); color: var(--coral); }
+.game-flip7 .btn-bust.on{ background: var(--coral); color:#fff; }
 
 .game-flip7 .hidden{ display:none !important; }
 
-/* ---- Modals ---- */
+/* ---- Modales ---- */
 .game-flip7 .modal-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(42,15,29,0.75);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index: 100;
-  padding: 20px;
+  position: fixed; inset: 0; background: rgba(43,42,124,0.6);
+  display:flex; align-items:center; justify-content:center; z-index: 100; padding: 20px;
 }
-.game-flip7 .modal-card{
-  width: 100%;
-  max-width: 360px;
-  background: var(--felt-800);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 22px;
-  text-align: center;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+.game-flip7 .modal-card, .game-flip7 .modal-box{
+  width: 100%; max-width: 360px; background: var(--cream); color: var(--navy);
+  border: 2px solid var(--navy); box-shadow: 0 5px 0 var(--navy);
+  border-radius: 18px; padding: 22px;
 }
-.game-flip7 .modal-title{
-  font-family:'Fredoka', sans-serif;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: var(--gold);
-  margin: 0 0 10px;
-}
-.game-flip7 .modal-message{
-  margin: 0 0 18px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--cream);
-  text-align: left;
-}
+.game-flip7 .modal-card{ text-align:center; }
+.game-flip7 .modal-title{ font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.15rem; color: var(--navy); margin:0 0 10px; }
+.game-flip7 .modal-message{ margin:0 0 18px; font-size:.9rem; line-height:1.5; text-align:left; }
+.game-flip7 .modal-box p{ margin:0 0 18px; font-size:.95rem; line-height:1.5; }
 .game-flip7 .modal-ok{
-  width: 100%;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 8px;
-  font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  background: var(--gold);
-  color: var(--felt-900);
+  width:100%; border:2px solid var(--navy); border-radius:12px; padding:12px 8px;
+  font-family:'Fredoka',sans-serif; font-weight:600; font-size:.95rem; cursor:pointer;
+  background: var(--yellow); color: var(--navy);
 }
-
-.game-flip7 .modal-box{
-  background: var(--felt-800);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 20px;
-  max-width: 360px;
-  width: 100%;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-}
-.game-flip7 .modal-box p{
-  margin: 0 0 18px;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--cream);
-}
-.game-flip7 .modal-actions{
-  display:flex;
-  gap: 10px;
-}
+.game-flip7 .modal-actions{ display:flex; gap:10px; }
 .game-flip7 .modal-actions button{
-  flex:1;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 8px;
-  font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
+  flex:1; border:2px solid var(--navy); border-radius:12px; padding:12px 8px;
+  font-family:'Fredoka',sans-serif; font-weight:600; font-size:.9rem; cursor:pointer;
 }
-.game-flip7 .modal-cancel{
-  background: rgba(255,255,255,0.08);
-  color: var(--cream);
-}
-.game-flip7 .modal-confirm{
-  background: var(--red);
-  color: var(--ivory);
-}
+.game-flip7 .modal-cancel{ background: var(--cream); color: var(--navy); }
+.game-flip7 .modal-confirm{ background: var(--coral); color:#fff; }
 
-.game-flip7 .chip-entry{
-  margin-top:6px; width:100%; min-height:34px; border-radius:10px; border:1px dashed var(--gold-dim);
-  background:rgba(224,86,138,.1); color:var(--gold-bright); font-family:'Fredoka',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer;
+/* ---- Feuille de saisie des cartes ---- */
+.game-flip7 .sheet-overlay{ position:fixed; inset:0; background:rgba(43,42,124,.5); display:flex; align-items:flex-end; justify-content:center; z-index:90; }
+.game-flip7 .sheet{
+  width:100%; max-width:560px; background: var(--cream); color: var(--navy);
+  border-top:3px solid var(--navy); border-radius:20px 20px 0 0;
+  padding:12px 14px calc(14px + env(safe-area-inset-bottom));
 }
-.game-flip7 .chip-entry.has-entry{ border-style:solid; background:rgba(224,86,138,.25); }
-.game-flip7 .chip-entry.is-bust{ border-color:rgba(192,72,63,.6); background:rgba(192,72,63,.2); color:#e6a49e; }
-.game-flip7 .chip-entry.is-flip{ background:var(--gold); border-color:var(--gold); color:var(--felt-900); }
+.game-flip7 .sheet-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.game-flip7 .sheet-player{ font-family:'Fredoka',sans-serif; font-weight:600; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-flip7 .sheet-tabs{ display:flex; background:rgba(43,42,124,.12); border-radius:999px; padding:3px; }
+.game-flip7 .sheet-tab{ border:none; background:none; color:var(--navy); padding:7px 14px; border-radius:999px; font-weight:700; font-size:.8rem; cursor:pointer; }
+.game-flip7 .sheet-tab.on{ background:var(--navy); color:var(--cream); }
+.game-flip7 .sheet-clear{ border:none; background:none; color:var(--navy); font-size:1.3rem; opacity:.7; width:36px; cursor:pointer; }
+.game-flip7 .sheet-total{ text-align:center; font-family:'Fredoka',sans-serif; font-weight:800; font-size:2.6rem; line-height:1.1; color:var(--navy); }
+.game-flip7 .sheet-count{ text-align:center; font-size:.8rem; font-weight:600; opacity:.75; margin-bottom:8px; min-height:1.1em; }
+
+.game-flip7 .num-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+.game-flip7 .num, .game-flip7 .mod{
+  height:46px; border-radius:12px; border:2px solid var(--navy); background:#fff;
+  color:var(--navy); font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.1rem; cursor:pointer;
+}
+.game-flip7 .num:active, .game-flip7 .mod:active{ transform: scale(.94); }
+/* couleurs des cartes de la boîte */
+.game-flip7 .num:nth-child(7n+1){ border-color:var(--orange); color:var(--orange); }
+.game-flip7 .num:nth-child(7n+2){ border-color:var(--green); color:#6e8a14; }
+.game-flip7 .num:nth-child(7n+3){ border-color:var(--blue); color:var(--blue); }
+.game-flip7 .num:nth-child(7n+4){ border-color:var(--coral); color:var(--coral); }
+.game-flip7 .num:nth-child(7n+5){ border-color:var(--navy); color:var(--navy); }
+.game-flip7 .num:nth-child(7n+6){ border-color:var(--orange); color:var(--orange); }
+.game-flip7 .num:nth-child(7n){ border-color:var(--blue); color:var(--blue); }
+.game-flip7 .num.on, .game-flip7 .mod.on{ background:var(--navy); border-color:var(--navy); color:var(--yellow); }
+.game-flip7 .mod-row{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:10px; }
+.game-flip7 .mod{ height:40px; font-size:.95rem; background: var(--yellow); }
+
+.game-flip7 .manual{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
+.game-flip7 .manual-quick{ display:flex; justify-content:center; gap:8px; margin-bottom:10px; }
+.game-flip7 .step-btn{
+  width:44px; height:44px; border-radius:12px; border:2px solid var(--navy);
+  background: var(--yellow); color:var(--navy); font-size:1.3rem; font-weight:700; cursor:pointer;
+}
+.game-flip7 .pts-input{
+  width:80px; height:44px; text-align:center; border-radius:12px; border:2px solid var(--navy);
+  background:#fff; color:var(--navy); font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.2rem;
+}
+.game-flip7 .toggle{
+  border-radius:12px; border:2px solid var(--navy); background:#fff; color:var(--navy);
+  padding:10px 12px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:.85rem; cursor:pointer;
+}
+.game-flip7 .toggle-flip.on{ background: var(--yellow); }
+.game-flip7 .sheet-actions{ display:flex; gap:10px; }
+.game-flip7 .sheet-actions .btn{ padding:12px 8px; }

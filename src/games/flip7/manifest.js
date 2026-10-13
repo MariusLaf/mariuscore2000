@@ -10,7 +10,7 @@ export default {
   name: 'Flip 7',
   icon: '🃏',
   description: "Compteur de points pour le jeu de cartes Flip 7 (objectif 200).",
-  themeColor: '#e0568a',
+  themeColor: '#2aa3a6',
 
   async mount(container) {
     styleEl = document.createElement('style');
