@@ -154,12 +154,19 @@ export default function initFlip7(container) {
   const MODS = [2, 4, 6, 8, 10];
 
   function entryFor(id) {
-    state.entries[id] = Object.assign(
-      { mode: 'cards', nums: [], mods: [], x2: false, bust: false, pts: 0, flip7: false },
-      state.entries[id]
-    );
-    return state.entries[id];
+    // Fill missing fields in place: callers keep a reference to the returned object
+    const defaults = { mode: 'cards', nums: [], mods: [], x2: false, bust: false, pts: 0, flip7: false, confirmed: false };
+    if (!state.entries[id]) state.entries[id] = {};
+    const e = state.entries[id];
+    Object.keys(defaults).forEach((k) => { if (e[k] === undefined) e[k] = defaults[k]; });
+    return e;
   }
+
+  function isDone(e) {
+    return e.confirmed || e.bust || e.nums.length > 0 || e.mods.length > 0 || e.x2 || e.pts > 0 || e.flip7;
+  }
+
+  function doneCount() { return state.players.filter((p) => isDone(entryFor(p.id))).length; }
 
   function isFlip7(e) { return !e.bust && (e.mode === 'cards' ? e.nums.length >= 7 : e.flip7); }
 
@@ -256,8 +263,9 @@ export default function initFlip7(container) {
     newPlayer: () => ({ score: 0, rounds: 0, busts: 0, flips: 0 }),
     renderStat: (p) => {
       const e = entryFor(p.id);
-      const done = e.bust || e.nums.length || e.mods.length || e.x2 || e.pts || e.flip7;
-      return `<button type="button" class="chip-entry${e.bust ? ' is-bust' : ''}${isFlip7(e) ? ' is-flip' : ''}${done ? ' has-entry' : ''}" data-entry="${p.id}">${isFlip7(e) ? '⭐ ' : ''}${e.bust ? 'Raté' : (done ? '+' + entryTotal(e) : '+ saisir')}</button>`;
+      const done = isDone(e);
+      const label = e.bust ? '✗ Raté' : (done ? (isFlip7(e) ? '⭐ ' : '✓ ') + '+' + entryTotal(e) : '+ saisir');
+      return `<button type="button" class="chip-entry${e.bust ? ' is-bust' : ''}${isFlip7(e) ? ' is-flip' : ''}${done ? ' has-entry' : ''}${p.id === sheetId ? ' editing' : ''}" data-entry="${p.id}">${label}</button>`;
     },
     beforeChange: () => pushHistorySnapshot(),
     afterChange: () => { saveState(); render(); }
@@ -273,7 +281,7 @@ export default function initFlip7(container) {
     roundZone.innerHTML = `
       <div class="round-title">Manche ${state.round}</div>
       <div class="main-actions">
-        <button class="btn btn-validate" id="validateBtn">Valider la manche</button>
+        <button class="btn btn-validate" id="validateBtn">Valider la manche · ${doneCount()}/${state.players.length}</button>
       </div>
     `;
     container.querySelector('#validateBtn').onclick = validateRound;
@@ -299,10 +307,19 @@ export default function initFlip7(container) {
     const next = nextPlayerId(p.id);
     const total = entryTotal(e);
     const refresh = () => { saveState(); renderSheet(); };
+    renderScoreboard();
+    const doneBtn = roundZone.querySelector('#validateBtn');
+    if (doneBtn) doneBtn.textContent = `Valider la manche · ${doneCount()}/${state.players.length}`;
 
     sheetZone.innerHTML = `
       <div class="sheet-overlay" id="sheetOverlay">
         <div class="sheet">
+          <div class="sheet-players">
+            ${state.players.map((pl) => {
+              const pe = entryFor(pl.id);
+              return `<button class="sp${pl.id === p.id ? ' cur' : ''}${isDone(pe) ? ' done' : ''}${pe.bust ? ' bust' : ''}" data-goto="${pl.id}">${isDone(pe) ? (pe.bust ? '✗ ' : '✓ ') : ''}${escapeAttr(pl.name)}</button>`;
+            }).join('')}
+          </div>
           <div class="sheet-top">
             <span class="sheet-player">${escapeAttr(p.name)}</span>
             <div class="sheet-tabs">
@@ -340,11 +357,16 @@ export default function initFlip7(container) {
     sheetZone.querySelector('#sheetOverlay').addEventListener('click', (ev) => {
       if (ev.target.id === 'sheetOverlay') closeSheet();
     });
+    sheetZone.querySelectorAll('[data-goto]').forEach((b) => {
+      b.onclick = () => { saveState(); sheetId = b.getAttribute('data-goto'); renderSheet(); };
+    });
+    const cur = sheetZone.querySelector('.sp.cur');
+    if (cur) cur.scrollIntoView({ inline: 'center', block: 'nearest' });
     sheetZone.querySelectorAll('[data-mode]').forEach((b) => {
       b.onclick = () => { e.mode = b.getAttribute('data-mode'); refresh(); };
     });
     sheetZone.querySelector('#sheetClear').onclick = () => {
-      Object.assign(e, { nums: [], mods: [], x2: false, bust: false, pts: 0, flip7: false });
+      Object.assign(e, { nums: [], mods: [], x2: false, bust: false, pts: 0, flip7: false, confirmed: false });
       refresh();
     };
     sheetZone.querySelectorAll('[data-num]').forEach((b) => {
@@ -379,13 +401,27 @@ export default function initFlip7(container) {
     // Raté = 0 pt and jump straight to the next player
     sheetZone.querySelector('#bustBtn').onclick = () => {
       e.bust = !e.bust;
+      e.confirmed = e.bust;
       saveState();
       if (e.bust && next) { sheetId = next; renderSheet(); } else if (e.bust) closeSheet(); else renderSheet();
     };
     sheetZone.querySelector('#okBtn').onclick = () => {
+      e.confirmed = true;
       saveState();
       if (next) { sheetId = next; renderSheet(); } else closeSheet();
     };
+  }
+
+  // Re-render the tiles and rebind their "saisir" buttons (also called live while the sheet is open)
+  function renderScoreboard() {
+    playerBoard.render();
+    scoreboard.querySelectorAll('[data-entry]').forEach((btn) => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        sheetId = btn.getAttribute('data-entry');
+        renderSheet();
+      });
+    });
   }
 
   function render() {
@@ -396,14 +432,7 @@ export default function initFlip7(container) {
       : '';
     roundChip.textContent = 'Manche ' + state.round;
 
-    playerBoard.render();
-    scoreboard.querySelectorAll('[data-entry]').forEach((btn) => {
-      btn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        sheetId = btn.getAttribute('data-entry');
-        renderSheet();
-      });
-    });
+    renderScoreboard();
     renderRoundZone();
 
     logEl.innerHTML = (state.log || []).slice(0, 12).map((entry) =>

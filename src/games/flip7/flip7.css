@@ -125,7 +125,7 @@
 .game-flip7 .modal-confirm{ background: var(--coral); color:#fff; }
 
 /* ---- Feuille de saisie des cartes ---- */
-.game-flip7 .sheet-overlay{ position:fixed; inset:0; background:rgba(43,42,124,.5); display:flex; align-items:flex-end; justify-content:center; z-index:90; }
+.game-flip7 .sheet-overlay{ position:fixed; inset:0; background:rgba(43,42,124,.25); display:flex; align-items:flex-end; justify-content:center; z-index:90; }
 .game-flip7 .sheet{
   width:100%; max-width:560px; background: var(--cream); color: var(--navy);
   border-top:3px solid var(--navy); border-radius:20px 20px 0 0;
@@ -179,3 +179,14 @@
 .game-flip7 .rank-score{ font-family:'Fredoka',sans-serif; font-weight:800; font-size:1.3rem; min-width:2.5ch; text-align:right; }
 .game-flip7 .rank-row.first .rank-score{ color:var(--orange); }
 .game-flip7 .modal-box .modal-actions{ margin-top:14px; }
+
+.game-flip7 .chip-entry.editing{ outline: 3px solid var(--orange); outline-offset: 1px; }
+.game-flip7 .sheet-players{ display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:6px; scrollbar-width:none; }
+.game-flip7 .sheet-players::-webkit-scrollbar{ display:none; }
+.game-flip7 .sp{
+  flex:0 0 auto; border:1px solid var(--line); background:#fff; color:var(--navy); border-radius:999px;
+  padding:6px 12px; font-size:.8rem; font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.game-flip7 .sp.done{ background:rgba(43,42,124,.12); }
+.game-flip7 .sp.bust{ color:var(--coral); }
+.game-flip7 .sp.cur{ background:var(--navy); border-color:var(--navy); color:#fff; }
