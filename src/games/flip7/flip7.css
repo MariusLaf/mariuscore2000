@@ -91,32 +91,58 @@
 .game-flip7 .round-title{ text-align:center; font-size:.8rem; opacity:.75; margin:4px 0 10px; }
 .game-flip7 .entry-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
 .game-flip7 .entry{
-  display:grid; grid-template-columns: 1fr auto; gap:8px 10px; align-items:center;
-  background: rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
+  display:grid; grid-template-columns: auto 1fr auto; gap:10px; align-items:center; width:100%; text-align:left;
+  background: rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:12px; padding:8px 12px;
+  color:inherit; font:inherit; cursor:pointer;
 }
 .game-flip7 .entry.is-bust{ border-color: rgba(192,72,63,.5); background: rgba(192,72,63,.12); }
 .game-flip7 .entry.is-flip{ border-color: var(--gold); background: rgba(224,86,138,.16); }
-.game-flip7 .entry-name{ font-family:'Fredoka',sans-serif; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.game-flip7 .entry-total{ font-family:'Fredoka',sans-serif; font-weight:800; font-size:1.3rem; color:var(--gold-bright); text-align:right; font-variant-numeric:tabular-nums; }
+.game-flip7 .entry-name{ font-family:'Fredoka',sans-serif; font-weight:600; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-flip7 .entry-sum{ font-size:.75rem; opacity:.65; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-flip7 .entry-total{ font-family:'Fredoka',sans-serif; font-weight:800; font-size:1.2rem; color:var(--gold-bright); font-variant-numeric:tabular-nums; }
 .game-flip7 .is-bust .entry-total{ color:#e6a49e; }
-.game-flip7 .entry-stepper{ display:flex; align-items:center; gap:6px; }
 .game-flip7 .step-btn{
-  width:38px; height:38px; border-radius:10px; border:1px solid var(--gold-dim);
-  background: rgba(224,86,138,.12); color:var(--gold-bright); font-size:1.2rem; font-weight:700; cursor:pointer;
+  width:44px; height:44px; border-radius:12px; border:1px solid var(--gold-dim);
+  background: rgba(224,86,138,.12); color:var(--gold-bright); font-size:1.3rem; font-weight:700; cursor:pointer;
 }
-.game-flip7 .step-btn:active{ background: rgba(224,86,138,.3); }
 .game-flip7 .pts-input{
-  width:64px; height:38px; text-align:center; border-radius:10px; border:1px solid var(--line);
-  background: rgba(0,0,0,.25); color:var(--ivory); font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.1rem;
+  width:80px; height:44px; text-align:center; border-radius:12px; border:1px solid var(--line);
+  background: rgba(0,0,0,.25); color:var(--ivory); font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.2rem;
 }
-.game-flip7 .entry-toggles{ display:flex; gap:6px; justify-content:flex-end; }
 .game-flip7 .toggle{
-  border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--cream);
-  padding:8px 10px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:.8rem; cursor:pointer;
+  border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--cream);
+  padding:10px 12px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:.85rem; cursor:pointer;
 }
-.game-flip7 .toggle:disabled, .game-flip7 .step-btn:disabled, .game-flip7 .pts-input:disabled{ opacity:.35; }
-.game-flip7 .toggle-bust.on{ background: var(--red); border-color: var(--red); color: var(--ivory); }
 .game-flip7 .toggle-flip.on{ background: var(--gold); border-color: var(--gold); color: var(--felt-900); }
+
+/* ---- Card entry sheet ---- */
+.game-flip7 .sheet-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:90; }
+.game-flip7 .sheet{
+  width:100%; max-width:560px; background: var(--felt-800); border-top:1px solid var(--line);
+  border-radius:20px 20px 0 0; padding:12px 14px calc(14px + env(safe-area-inset-bottom));
+}
+.game-flip7 .sheet-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.game-flip7 .sheet-player{ font-family:'Fredoka',sans-serif; font-weight:600; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-flip7 .sheet-tabs{ display:flex; background:rgba(0,0,0,.25); border-radius:999px; padding:3px; }
+.game-flip7 .sheet-tab{ border:none; background:none; color:var(--cream); padding:7px 14px; border-radius:999px; font-weight:600; font-size:.8rem; cursor:pointer; }
+.game-flip7 .sheet-tab.on{ background:var(--ivory); color:var(--felt-900); }
+.game-flip7 .sheet-clear{ border:none; background:none; color:var(--cream); font-size:1.3rem; opacity:.7; width:36px; cursor:pointer; }
+.game-flip7 .sheet-total{ text-align:center; font-family:'Fredoka',sans-serif; font-weight:800; font-size:2.4rem; line-height:1.1; color:var(--gold-bright); }
+.game-flip7 .sheet-count{ text-align:center; font-size:.8rem; opacity:.7; margin-bottom:8px; min-height:1.1em; }
+.game-flip7 .num-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+.game-flip7 .num, .game-flip7 .mod{
+  height:46px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.07);
+  color:var(--ivory); font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.05rem; cursor:pointer;
+}
+.game-flip7 .num.on, .game-flip7 .mod.on{ background:var(--gold); border-color:var(--gold); color:var(--felt-900); }
+.game-flip7 .mod-row{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:10px; }
+.game-flip7 .mod{ height:40px; font-size:.9rem; }
+.game-flip7 .manual{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
+.game-flip7 .manual-quick{ display:flex; justify-content:center; gap:8px; margin-bottom:10px; }
+.game-flip7 .sheet-actions{ display:flex; gap:10px; }
+.game-flip7 .sheet-actions .btn{ padding:12px 8px; }
+.game-flip7 .btn-bust{ background:rgba(192,72,63,.18); color:#e6a49e; border:1px solid rgba(192,72,63,.4); }
+.game-flip7 .btn-bust.on{ background:var(--red); color:var(--ivory); }
 .game-flip7 .btn-validate:disabled{ opacity:.35; }
 .game-flip7 .main-actions{
   display:flex;
