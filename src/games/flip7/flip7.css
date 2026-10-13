@@ -170,3 +170,12 @@
 
 .game-flip7 .log-toggle{ color: var(--cream); }
 .game-flip7 .chip-entry.is-bust{ border-color: var(--coral); }
+
+.game-flip7 .modal-box .modal-title{ text-align:center; }
+.game-flip7 .rank-row{ display:grid; grid-template-columns:2rem 1fr auto auto; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid var(--line); }
+.game-flip7 .rank-pos{ font-size:1.2rem; text-align:center; font-family:'Fredoka',sans-serif; font-weight:700; }
+.game-flip7 .rank-name{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-flip7 .rank-left{ font-size:.72rem; opacity:.65; }
+.game-flip7 .rank-score{ font-family:'Fredoka',sans-serif; font-weight:800; font-size:1.3rem; min-width:2.5ch; text-align:right; }
+.game-flip7 .rank-row.first .rank-score{ color:var(--orange); }
+.game-flip7 .modal-box .modal-actions{ margin-top:14px; }

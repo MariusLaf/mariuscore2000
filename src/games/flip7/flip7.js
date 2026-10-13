@@ -10,6 +10,7 @@ const MARKUP = `
     <h1>Flip 7<span class="dot">.</span></h1>
     <div class="header-actions">
       <span class="round-chip" id="roundChip">Manche 1</span>
+      <button class="icon-btn-sm" id="rankBtn" title="Classement">🏆</button>
       <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm" id="rulesBtn" title="Règles du compteur">ℹ️</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler la dernière manche">↩︎</button>
@@ -80,6 +81,36 @@ export default function initFlip7(container) {
     button: container.querySelector('#gamesHistoryBtn'),
     storageKey: 'flip7-games-history-v1'
   });
+
+  function showRanking() {
+    const modalZone = container.querySelector('#modalZone');
+    const sorted = state.players.slice().sort((a, b) => b.score - a.score);
+    const medals = ['🥇', '🥈', '🥉'];
+    let rank = 0;
+    const rows = sorted.map((p, i) => {
+      if (i === 0 || p.score !== sorted[i - 1].score) rank = i + 1; // ex æquo : même rang
+      const left = Math.max(0, TARGET - p.score);
+      return `<div class="rank-row${i === 0 ? ' first' : ''}">
+        <span class="rank-pos">${medals[rank - 1] || rank}</span>
+        <span class="rank-name">${escapeAttr(p.name)}</span>
+        <span class="rank-left">${left > 0 ? left + ' restants' : 'objectif atteint'}</span>
+        <span class="rank-score">${p.score}</span>
+      </div>`;
+    }).join('');
+    modalZone.innerHTML = `
+      <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+          <h3 class="modal-title">Classement — objectif ${TARGET}</h3>
+          ${rows || '<p>Aucun joueur.</p>'}
+          <div class="modal-actions"><button class="modal-cancel" id="modalCancel">Fermer</button></div>
+        </div>
+      </div>`;
+    container.querySelector('#modalCancel').onclick = () => { modalZone.innerHTML = ''; };
+    container.querySelector('#modalOverlay').addEventListener('click', (e) => {
+      if (e.target.id === 'modalOverlay') modalZone.innerHTML = '';
+    });
+  }
+  container.querySelector('#rankBtn').addEventListener('click', showRanking);
 
   function escapeAttr(s) { return String(s).replace(/"/g, '&quot;'); }
 
