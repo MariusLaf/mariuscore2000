@@ -29,7 +29,7 @@ const MARKUP = `
 <div id="rulesOverlay" class="modal-overlay hidden">
   <div class="modal-card">
     <h3 class="modal-title">Règles du compteur</h3>
-    <p class="modal-message">Chaque manche, touche le bouton « + saisir » sous le joueur, puis les cartes qu'il a devant lui (onglet Cartes : total et Flip 7 automatiques) ou saisis son total à la main (onglet Manuel). « Raté » met la manche à 0 (doublon) et passe au joueur suivant. Flip 7 = 7 cartes Nombre différentes : +15 points. « Valider la manche » additionne tout et fait tourner le donneur (chip en surbrillance). La partie se termine à la fin de la manche où quelqu'un atteint 200 points : le meilleur score gagne.</p>
+    <p class="modal-message">Chaque manche, touche le bouton « + saisir » sous le joueur, puis les cartes qu'il a devant lui (onglet Cartes : total et Flip 7 automatiques) ou saisis son total à la main (onglet Manuel). « Raté » met la manche à 0 (doublon) et passe au joueur suivant. Flip 7 = 7 cartes Nombre différentes : +15 points. « Valider la manche » additionne tout. La partie se termine à la fin de la manche où quelqu'un atteint 200 points : le meilleur score gagne.</p>
     <button class="modal-ok" id="rulesClose">Fermer</button>
   </div>
 </div>
@@ -168,7 +168,6 @@ export default function initFlip7(container) {
     });
     addLog(`Manche ${state.round} — ${parts.join(', ')}`, 0);
     state.round += 1;
-    state.currentIndex = (state.currentIndex + 1) % state.players.length;
     state.entries = {};
     if (!state.gameRecorded) {
       const winner = bestAtOrAboveTarget();
@@ -221,8 +220,8 @@ export default function initFlip7(container) {
   const playerBoard = createPlayerBoard({
     container: scoreboard,
     getPlayers: () => state.players,
-    getCurrentIndex: () => state.currentIndex,
-    setCurrentIndex: (i) => { state.currentIndex = i; },
+    getCurrentIndex: () => -1, // pas de joueur actif à Flip 7
+    setCurrentIndex: () => {},
     newPlayer: () => ({ score: 0, rounds: 0, busts: 0, flips: 0 }),
     renderStat: (p) => {
       const e = entryFor(p.id);
@@ -241,7 +240,7 @@ export default function initFlip7(container) {
       return;
     }
     roundZone.innerHTML = `
-      <div class="round-title">Manche ${state.round} — donneur : <b>${escapeAttr(state.players[state.currentIndex % state.players.length].name)}</b></div>
+      <div class="round-title">Manche ${state.round}</div>
       <div class="main-actions">
         <button class="btn btn-validate" id="validateBtn">Valider la manche</button>
       </div>

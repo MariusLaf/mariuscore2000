@@ -10,13 +10,13 @@ Compter les points du jeu de cartes **Flip 7** (3 à 18 joueurs) manche après m
 - La partie se termine à la fin de la manche où au moins un joueur atteint **200 points** ; le plus haut score gagne.
 
 ## Fonctionnalités
-1. **Joueurs** : ajout, suppression, renommage, glisser-déposer (brique partagée `createPlayerBoard`). Le chip "actif" indique le **donneur**, qui tourne à chaque manche.
+1. **Joueurs** : ajout, suppression, renommage, glisser-déposer (brique partagée `createPlayerBoard`). Aucun joueur "actif" : tout le monde joue en même temps.
 2. **Saisie d'une manche** : une ligne par joueur avec
    - les points de ses cartes (champ numérique + boutons −/+ ),
    - un bouton **Raté** (force 0 pt),
    - un bouton **Flip 7** (+15 pts, affiché sur la ligne).
    - total de la manche affiché par joueur.
-3. **Valider la manche** : ajoute les totaux, incrémente le n° de manche, fait tourner le donneur.
+3. **Valider la manche** : ajoute les totaux, incrémente le n° de manche.
 4. **Fin de partie** : si ≥ 200 pts après validation → bandeau de victoire (meilleur score) + enregistrement dans l'historique des parties (une seule fois).
 5. **Annuler** la dernière manche (pile d'instantanés).
 6. **Nouvelle partie** / **Tout réinitialiser** (avec confirmation, enregistrement de la partie inachevée s'il y a eu de l'activité, via `pickLeader`).
