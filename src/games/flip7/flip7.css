@@ -262,3 +262,11 @@
   background: var(--red);
   color: var(--ivory);
 }
+
+.game-flip7 .chip-entry{
+  margin-top:6px; width:100%; min-height:34px; border-radius:10px; border:1px dashed var(--gold-dim);
+  background:rgba(224,86,138,.1); color:var(--gold-bright); font-family:'Fredoka',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer;
+}
+.game-flip7 .chip-entry.has-entry{ border-style:solid; background:rgba(224,86,138,.25); }
+.game-flip7 .chip-entry.is-bust{ border-color:rgba(192,72,63,.6); background:rgba(192,72,63,.2); color:#e6a49e; }
+.game-flip7 .chip-entry.is-flip{ background:var(--gold); border-color:var(--gold); color:var(--felt-900); }

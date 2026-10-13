@@ -29,7 +29,7 @@ const MARKUP = `
 <div id="rulesOverlay" class="modal-overlay hidden">
   <div class="modal-card">
     <h3 class="modal-title">Règles du compteur</h3>
-    <p class="modal-message">Chaque manche, touche un joueur puis les cartes qu'il a devant lui (onglet Cartes : total et Flip 7 automatiques) ou saisis son total à la main (onglet Manuel). « Raté » met la manche à 0 (doublon) et passe au joueur suivant. Flip 7 = 7 cartes Nombre différentes : +15 points. « Valider la manche » additionne tout et fait tourner le donneur (chip en surbrillance). La partie se termine à la fin de la manche où quelqu'un atteint 200 points : le meilleur score gagne.</p>
+    <p class="modal-message">Chaque manche, touche le bouton « + saisir » sous le joueur, puis les cartes qu'il a devant lui (onglet Cartes : total et Flip 7 automatiques) ou saisis son total à la main (onglet Manuel). « Raté » met la manche à 0 (doublon) et passe au joueur suivant. Flip 7 = 7 cartes Nombre différentes : +15 points. « Valider la manche » additionne tout et fait tourner le donneur (chip en surbrillance). La partie se termine à la fin de la manche où quelqu'un atteint 200 points : le meilleur score gagne.</p>
     <button class="modal-ok" id="rulesClose">Fermer</button>
   </div>
 </div>
@@ -224,7 +224,11 @@ export default function initFlip7(container) {
     getCurrentIndex: () => state.currentIndex,
     setCurrentIndex: (i) => { state.currentIndex = i; },
     newPlayer: () => ({ score: 0, rounds: 0, busts: 0, flips: 0 }),
-    renderStat: (p) => `<p class="chip-stat${p.flips > 0 ? ' has-some' : ''}">${p.flips || 0} × Flip 7</p>`,
+    renderStat: (p) => {
+      const e = entryFor(p.id);
+      const done = e.bust || e.nums.length || e.mods.length || e.x2 || e.pts || e.flip7;
+      return `<button type="button" class="chip-entry${e.bust ? ' is-bust' : ''}${isFlip7(e) ? ' is-flip' : ''}${done ? ' has-entry' : ''}" data-entry="${p.id}">${isFlip7(e) ? '⭐ ' : ''}${e.bust ? 'Raté' : (done ? '+' + entryTotal(e) : '+ saisir')}</button>`;
+    },
     beforeChange: () => pushHistorySnapshot(),
     afterChange: () => { saveState(); render(); }
   });
@@ -238,24 +242,10 @@ export default function initFlip7(container) {
     }
     roundZone.innerHTML = `
       <div class="round-title">Manche ${state.round} — donneur : <b>${escapeAttr(state.players[state.currentIndex % state.players.length].name)}</b></div>
-      <div class="entry-list">
-        ${state.players.map((p) => {
-          const e = entryFor(p.id);
-          return `
-          <button class="entry${e.bust ? ' is-bust' : ''}${isFlip7(e) ? ' is-flip' : ''}" data-id="${p.id}">
-            <span class="entry-name">${escapeAttr(p.name)}</span>
-            <span class="entry-sum">${isFlip7(e) ? '⭐ Flip 7 · ' : ''}${escapeAttr(entrySummary(e))}</span>
-            <span class="entry-total">+${entryTotal(e)}</span>
-          </button>`;
-        }).join('')}
-      </div>
       <div class="main-actions">
         <button class="btn btn-validate" id="validateBtn">Valider la manche</button>
       </div>
     `;
-    roundZone.querySelectorAll('.entry').forEach((row) => {
-      row.onclick = () => { sheetId = row.getAttribute('data-id'); renderSheet(); };
-    });
     container.querySelector('#validateBtn').onclick = validateRound;
   }
 
@@ -377,6 +367,13 @@ export default function initFlip7(container) {
     roundChip.textContent = 'Manche ' + state.round;
 
     playerBoard.render();
+    scoreboard.querySelectorAll('[data-entry]').forEach((btn) => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        sheetId = btn.getAttribute('data-entry');
+        renderSheet();
+      });
+    });
     renderRoundZone();
 
     logEl.innerHTML = (state.log || []).slice(0, 12).map((entry) =>
