@@ -1,19 +1,19 @@
 @import '../../shared/game-ui.css';
 
 .game-libre {
-  --bg: #EEF1F5;
-  --surface: #FFFFFF;
-  --surface-2: #E7EBF0;
-  --ink: #1F2937;
-  --ink-soft: #6B7280;
-  --accent: #3B6FD6;
-  --accent-ink: #FFFFFF;
-  --line: #D7DDE5;
-  --danger: #C0483F;
-  --danger-soft: #F0DAD4;
-  --success: #3F9142;
-  --shadow: rgba(31, 41, 55, 0.12);
-  color-scheme: light;
+  --bg: #14181F;
+  --surface: #1C222B;
+  --surface-2: #262D38;
+  --ink: #E6E9EF;
+  --ink-soft: #9AA4B2;
+  --accent: #6F9BF0;
+  --accent-ink: #10151D;
+  --line: #333C4A;
+  --danger: #DE8676;
+  --danger-soft: #4A2C26;
+  --success: #7BC47F;
+  --shadow: rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 
   /* shared game-ui.css tokens */
   --ui-surface: var(--surface);

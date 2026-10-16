@@ -1,20 +1,20 @@
 @import '../../shared/game-ui.css';
 
 .game-molkky {
-  --bg: #F3ECDD;
-  --surface: #FBF7EE;
-  --surface-2: #EFE5CE;
-  --ink: #3B2E22;
-  --ink-soft: #8A7A62;
-  --moss: #5B7553;
-  --moss-ink: #F4F7F1;
-  --amber: #B9791F;
-  --amber-soft: #EADFC3;
-  --red: #A6473A;
-  --red-soft: #F0DAD4;
-  --line: #E0D3B4;
-  --shadow: rgba(59, 46, 34, 0.12);
-  color-scheme: light;
+  --bg: #221B12;
+  --surface: #2C2318;
+  --surface-2: #382C1D;
+  --ink: #F1E7D4;
+  --ink-soft: #B4A488;
+  --moss: #86A876;
+  --moss-ink: #1B2417;
+  --amber: #E0A855;
+  --amber-soft: #4A3A23;
+  --red: #DE8676;
+  --red-soft: #4A2C26;
+  --line: #4A3D28;
+  --shadow: rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 
   /* shared game-ui.css tokens */
   --ui-surface: var(--surface);
