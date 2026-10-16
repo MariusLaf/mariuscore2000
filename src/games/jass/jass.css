@@ -42,10 +42,12 @@
 
 .game-jass * { box-sizing: border-box; }
 
+.game-jass .brand { padding: 6px 4px 10px; }
+
 .game-jass .wrap {
   max-width: 480px;
   margin: 0 auto;
-  padding: 20px 18px 40px;
+  padding: 10px 18px 16px;
   min-height: 100%;
 }
 
@@ -54,8 +56,8 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 14px 14px 16px;
-  margin-bottom: 14px;
+  padding: 10px 12px 12px;
+  margin-bottom: 8px;
   overflow: hidden;
 }
 .game-jass .team-panel-mirrored .mirror-inner {
@@ -65,7 +67,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .game-jass .team-name-input {
   flex: 1;
@@ -74,7 +76,7 @@
   border: 1px solid var(--line);
   color: var(--ink);
   border-radius: 8px;
-  padding: 7px 9px;
+  padding: 6px 9px;
   font-family: inherit;
   font-size: 0.85rem;
 }
@@ -82,31 +84,31 @@
 .game-jass .team-score {
   font-family: 'Caveat', cursive;
   font-weight: 700;
-  font-size: 2.4rem;
+  font-size: 2rem;
   line-height: 1;
   text-align: center;
   color: var(--ink);
-  margin: 4px 0 10px;
+  margin: 2px 0 6px;
 }
 
 .game-jass .ardoise {
   display: grid;
   grid-template-columns: 84px 1fr;
   grid-template-rows: auto auto auto;
-  gap: 6px;
+  gap: 4px;
   background: #0F1912;
   border: 6px solid var(--wood);
   border-radius: 6px;
-  padding: 10px;
+  padding: 7px;
   background-image: radial-gradient(circle at 15% 10%, rgba(255,255,255,0.03) 0%, transparent 50%);
 }
 .game-jass .ardoise-zone {
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 46px;
+  min-height: 38px;
 }
 .game-jass .zone-label {
   font-size: 9px;
@@ -118,17 +120,17 @@
 .game-jass .zone-value {
   font-family: 'Caveat', cursive;
   font-weight: 700;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   line-height: 1;
 }
 
-.game-jass .zone-red { grid-column: 1; grid-row: 1 / 3; background: color-mix(in srgb, var(--zone-red) 22%, transparent); align-items: center; }
-.game-jass .zone-red .zone-value { font-size: 2.4rem; color: var(--zone-red); }
-.game-jass .zone-yellow { grid-column: 2; grid-row: 1; background: color-mix(in srgb, var(--zone-yellow) 20%, transparent); }
+.game-jass .zone-purple { grid-column: 1; grid-row: 1; background: color-mix(in srgb, var(--zone-purple) 22%, transparent); align-items: center; }
+.game-jass .zone-purple .zone-value { color: var(--zone-purple); font-size: 1.15rem; }
+.game-jass .zone-blue { grid-column: 2; grid-row: 1; background: color-mix(in srgb, var(--zone-blue) 20%, transparent); }
+.game-jass .zone-red { grid-column: 1; grid-row: 2 / 4; background: color-mix(in srgb, var(--zone-red) 22%, transparent); align-items: center; }
+.game-jass .zone-red .zone-value { font-size: 2rem; color: var(--zone-red); }
 .game-jass .zone-green { grid-column: 2; grid-row: 2; background: color-mix(in srgb, var(--zone-green) 20%, transparent); }
-.game-jass .zone-purple { grid-column: 1; grid-row: 3; background: color-mix(in srgb, var(--zone-purple) 22%, transparent); align-items: center; }
-.game-jass .zone-purple .zone-value { color: var(--zone-purple); font-size: 1.3rem; }
-.game-jass .zone-blue { grid-column: 2; grid-row: 3; background: color-mix(in srgb, var(--zone-blue) 20%, transparent); }
+.game-jass .zone-yellow { grid-column: 2; grid-row: 3; background: color-mix(in srgb, var(--zone-yellow) 20%, transparent); }
 
 .game-jass .tally-svg { height: 24px; width: auto; }
 .game-jass .tally-yellow line { stroke: var(--zone-yellow); stroke-width: 2; }
@@ -136,38 +138,227 @@
 .game-jass .tally-blue line { stroke: var(--zone-blue); stroke-width: 2; }
 .game-jass .tally-empty { color: var(--ink-soft); opacity: 0.5; font-size: 0.85rem; }
 
-/* ---- Round entry (inline, per team panel) ---- */
-.game-jass .round-entry {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-.game-jass .round-entry input {
-  flex: 1;
-  min-width: 0;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  border-radius: 10px;
-  padding: 11px 12px;
-  font-family: inherit;
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-.game-jass .round-entry button {
-  flex-shrink: 0;
-  padding: 11px 16px;
+/* ---- Round entry: trigger button on the panel, controls in the modal ---- */
+.game-jass .open-entry-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 14px;
   border-radius: 10px;
   border: none;
   background: var(--zone-yellow);
   color: #1B2B22;
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
 }
-.game-jass .round-entry button:active { transform: scale(0.97); }
+.game-jass .open-entry-btn:active { transform: scale(0.98); }
+.game-jass .pending-badge {
+  font-variant-numeric: tabular-nums;
+}
+
+.game-jass .annonces-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.game-jass .annonces-label {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 2px;
+}
+.game-jass .annonce-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.game-jass .annonce-btn:active { transform: scale(0.96); }
+.game-jass .annonce-btn.active {
+  background: var(--zone-yellow);
+  border-color: var(--zone-yellow);
+  color: #1B2B22;
+}
+.game-jass .annonce-value {
+  opacity: 0.7;
+  font-size: 0.72rem;
+}
+.game-jass .annonce-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.game-jass .points-display-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.game-jass .points-display-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.game-jass .points-display-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin-bottom: 3px;
+}
+.game-jass .points-display {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ink);
+}
+.game-jass .points-summary {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-align: right;
+  margin-bottom: 10px;
+  min-height: 1.1em;
+}
+.game-jass .backspace-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.game-jass .backspace-btn:active { transform: scale(0.96); }
+
+.game-jass .keypad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.game-jass .keypad button {
+  border: none;
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 12px 0;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.game-jass .keypad button:active { transform: scale(0.96); }
+.game-jass .keypad-valider {
+  grid-column: span 2;
+  background: var(--zone-yellow);
+  color: #1B2B22;
+  font-weight: 700;
+}
+
+/* ---- Entry modal (keypad + annonces popup) ---- */
+.game-jass .entry-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+.game-jass .entry-card-mirrored .entry-card-inner {
+  transform: rotate(180deg);
+}
+.game-jass .entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.game-jass .entry-team-tabs {
+  display: flex;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.game-jass .entry-team-tab {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.game-jass .entry-team-tab.active {
+  background: var(--zone-yellow);
+  border-color: var(--zone-yellow);
+  color: #1B2B22;
+  cursor: default;
+}
+.game-jass .entry-team-tab:not(.active):active { transform: scale(0.96); }
+.game-jass .entry-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.game-jass .entry-close,
+.game-jass .entry-flip {
+  flex-shrink: 0;
+  border: none;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.game-jass .entry-close:active,
+.game-jass .entry-flip:active { transform: scale(0.94); }
+
+.game-jass .auto-complement-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.game-jass .auto-complement-row input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--zone-yellow);
+}
 
 /* ---- Modals ---- */
 .game-jass .modal-overlay {

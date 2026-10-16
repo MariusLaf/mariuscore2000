@@ -31,11 +31,48 @@ const MARKUP = `
       <li><span class="legend-swatch swatch-purple"></span> V (500) ou X (1000)</li>
       <li><span class="legend-swatch swatch-red"></span> le reste, écrit en chiffres</li>
     </ul>
-    <p class="modal-message">Le téléphone se pose au milieu de la table : l'ardoise de l'équipe 2 est retournée à 180° pour se lire normalement depuis l'autre côté. Chaque équipe entre ses propres points et valide de son côté.</p>
+    <p class="modal-message">Le téléphone se pose au milieu de la table : l'ardoise de l'équipe 1 est retournée à 180° pour se lire normalement depuis l'autre côté. Un bouton ⇅ dans la saisie permet de retourner le clavier manuellement si besoin.</p>
+    <p class="modal-message">« Saisir les points » ouvre un clavier avec les annonces (20 à 200). Une manche vaut 157 points hors annonces (257 pour un capot) : cochez « L'autre équipe marque 157 − plis » pour que l'équipe adverse soit créditée automatiquement.</p>
     <button class="modal-ok" id="infoClose">Fermer</button>
   </div>
 </div>
+
+<div id="entryOverlay" class="modal-overlay hidden">
+  <div class="entry-card" id="entryCard">
+    <div class="entry-card-inner" id="entryCardInner">
+      <div class="entry-header">
+        <div class="entry-team-tabs" id="entryTeamTabs"></div>
+        <div class="entry-header-actions">
+          <button type="button" class="entry-flip" id="entryFlip" title="Retourner le clavier">⇅</button>
+          <button type="button" class="entry-close" id="entryClose">✕</button>
+        </div>
+      </div>
+      <div id="entryBody"></div>
+    </div>
+  </div>
+</div>
 `;
+
+// The fixed set of card-combination announces, each worth a fixed value
+// regardless of how many such combinations exist — see
+// https://fr.wikipedia.org/wiki/Jass for the full probability table. Quinte
+// and Carré (As) share the same value (100) but are distinct declarations,
+// so they get separate toggle buttons.
+//
+// `max` caps how many times a team can declare the same announce in one
+// hand, per the 36-card deck: Stöck and each Carré are backed by a single,
+// unique set of cards (one trump king+queen, one set of four of a given
+// rank), so a team can hold at most one. A run (tierce/quarte/quinte) can be
+// held by either partner, so a team can hold at most two — never three.
+const ANNONCES = [
+  { key: 'tierce', value: 20, label: 'Tierce', title: 'Suite de 3 cartes (20 pts)', max: 2 },
+  { key: 'stock', value: 20, label: 'Stöck', title: 'Roi + dame d\'atout (20 pts)', max: 1 },
+  { key: 'quarte', value: 50, label: 'Quarte', title: 'Suite de 4 cartes (50 pts)', max: 2 },
+  { key: 'quinte', value: 100, label: 'Quinte', title: 'Suite de 5 cartes ou plus (100 pts)', max: 2 },
+  { key: 'carreAs', value: 100, label: 'Carré As', title: 'Quatre 10, dames, rois ou as (100 pts)', max: 1 },
+  { key: 'carreNeuf', value: 150, label: 'Carré 9', title: 'Quatre neufs (150 pts)', max: 1 },
+  { key: 'carreValets', value: 200, label: 'Carré V', title: 'Quatre valets (200 pts)', max: 1 }
+];
 
 const TEAM_TEMPLATE = () => ({ players: ['', ''], score: 0, tally: emptyTally() });
 
@@ -66,6 +103,12 @@ function decompose(totalScore) {
 // broken into the biggest denominations first, and whatever's left over is
 // added to the existing reste — carrying into a new yellow stroke if that
 // pushes it past 19.
+//
+// A single round is worth at most ~257 (a capot), so a round's own points
+// never reach 500 on their own — the only way the running total crosses the
+// 500/1000 marks is by accumulating enough ×100 strokes over several rounds.
+// So, same as the reste→×20 carry above, five ×100 strokes carry into one
+// "V" and two "V"s carry into one "X".
 function addPointsToTally(tally, points) {
   let remaining = Math.max(0, Math.trunc(points || 0));
   const newX = Math.floor(remaining / 1000); remaining %= 1000;
@@ -84,6 +127,13 @@ function addPointsToTally(tally, points) {
   tally.green += newGreen;
   tally.yellow += newYellow + carryYellow;
   tally.red = combinedRed;
+
+  const carryV = Math.floor(tally.blue / 5);
+  tally.blue %= 5;
+  tally.v += carryV;
+  const carryX = Math.floor(tally.v / 2);
+  tally.v %= 2;
+  tally.x += carryX;
 }
 
 function tallySVG(count, extraClass) {
@@ -140,18 +190,6 @@ function renderArdoise(tally) {
     : '—';
   return `
     <div class="ardoise">
-      <div class="ardoise-zone zone-red">
-        <span class="zone-label">reste</span>
-        <span class="zone-value red-number">${red}</span>
-      </div>
-      <div class="ardoise-zone zone-yellow">
-        <span class="zone-label">×20</span>
-        ${tallySVG(yellow, 'tally-yellow')}
-      </div>
-      <div class="ardoise-zone zone-green">
-        <span class="zone-label">×50</span>
-        ${tallyPairSVG(green, 'tally-green')}
-      </div>
       <div class="ardoise-zone zone-purple">
         <span class="zone-label">500/1000</span>
         <span class="zone-value purple-symbol">${purple}</span>
@@ -159,6 +197,18 @@ function renderArdoise(tally) {
       <div class="ardoise-zone zone-blue">
         <span class="zone-label">×100</span>
         ${tallySVG(blue, 'tally-blue')}
+      </div>
+      <div class="ardoise-zone zone-red">
+        <span class="zone-label">reste</span>
+        <span class="zone-value red-number">${red}</span>
+      </div>
+      <div class="ardoise-zone zone-green">
+        <span class="zone-label">×50</span>
+        ${tallyPairSVG(green, 'tally-green')}
+      </div>
+      <div class="ardoise-zone zone-yellow">
+        <span class="zone-label">×20</span>
+        ${tallySVG(yellow, 'tally-yellow')}
       </div>
     </div>
   `;
@@ -187,6 +237,32 @@ export default function initJass(container) {
     log: [],
     history: []
   };
+  // Points being keyed in for the current round, per team. Kept outside
+  // `state` since it's a transient entry in progress, not a committed score.
+  // Card points (base) are tracked separately from annonces because only
+  // the base counts toward the 157-point pool used for the auto-complement.
+  // Announces are toggles (keyed by ANNONCES[].key) rather than a running
+  // total, so each one can be switched back off if tapped by mistake, and
+  // several different announces can be active at once for the same team.
+  let pendingBase = [0, 0];
+  let pendingAnnonceActive = [{}, {}];
+  let autoComplement = true;
+  let manualFlip = [false, false];
+  let activeEntryTeam = null;
+
+  function annonceTotal(teamIndex) {
+    return ANNONCES.reduce((sum, a) => sum + (pendingAnnonceActive[teamIndex][a.key] || 0) * a.value, 0);
+  }
+
+  function pendingTotal(teamIndex) {
+    return pendingBase[teamIndex] + annonceTotal(teamIndex);
+  }
+
+  function isMirrored(teamIndex) {
+    // Team 1's modal/panel is flipped 180° by default so it reads right-side
+    // up from their side of the table; the manual flip button toggles that.
+    return (teamIndex === 0) !== manualFlip[teamIndex];
+  }
   if (!Array.isArray(state.log)) state.log = [];
   if (!Array.isArray(state.history)) state.history = [];
   state.teams.forEach((t) => {
@@ -202,6 +278,21 @@ export default function initJass(container) {
 
   infoBtn.addEventListener('click', () => infoOverlay.classList.remove('hidden'));
   infoClose.addEventListener('click', () => infoOverlay.classList.add('hidden'));
+
+  const entryOverlay = container.querySelector('#entryOverlay');
+  const entryCard = container.querySelector('#entryCard');
+  const entryTeamTabs = container.querySelector('#entryTeamTabs');
+  const entryClose = container.querySelector('#entryClose');
+  const entryFlip = container.querySelector('#entryFlip');
+  const entryBody = container.querySelector('#entryBody');
+
+  entryClose.addEventListener('click', closeEntryModal);
+  entryOverlay.addEventListener('click', (e) => { if (e.target === entryOverlay) closeEntryModal(); });
+  entryFlip.addEventListener('click', () => {
+    if (activeEntryTeam === null) return;
+    manualFlip[activeEntryTeam] = !manualFlip[activeEntryTeam];
+    entryCard.classList.toggle('entry-card-mirrored', isMirrored(activeEntryTeam));
+  });
 
   const gamesHistory = createGamesHistory({
     container,
@@ -237,15 +328,94 @@ export default function initJass(container) {
     gamesHistory.record(pickLeader(named).name, named);
   }
 
-  function applyTeamPoints(teamIndex, input) {
-    const raw = parseInt(input.value, 10);
-    const points = isNaN(raw) ? 0 : Math.max(0, raw);
-    if (points === 0) return;
+  function autoComplementLabel(teamIndex) {
+    const base = pendingBase[teamIndex];
+    if (base <= 0) return 'L\'autre équipe marque 157 − plis';
+    if (base >= 157) return 'L\'autre équipe ne marque rien (157 déjà atteint)';
+    return `L'autre équipe marque ${157 - base} points`;
+  }
+
+  function annonceButtonLabel(a, count) {
+    const countBadge = count > 1 ? ` <span class="annonce-count">×${count}</span>` : '';
+    return `${a.label} <span class="annonce-value">${a.value}</span>${countBadge}`;
+  }
+
+  function summaryText(teamIndex) {
+    const annonces = annonceTotal(teamIndex);
+    const total = pendingTotal(teamIndex);
+    if (annonces > 0) return `+ ${annonces} d'annonces = ${total} points`;
+    return `${total} point${total === 1 ? '' : 's'} à valider`;
+  }
+
+  // The keypad only ever edits the "plis" (card points) figure, kept visibly
+  // separate from the annonces total — those two are never the same number,
+  // since only the plis count toward the 157-point pool used for the
+  // auto-complement (see commitPoints below).
+  function updatePointsDisplay(teamIndex) {
+    const modalDisplay = entryOverlay.querySelector(`[data-points-display="${teamIndex}"]`);
+    if (modalDisplay) modalDisplay.textContent = String(pendingBase[teamIndex]);
+    const summary = entryOverlay.querySelector(`[data-points-summary="${teamIndex}"]`);
+    if (summary) summary.textContent = summaryText(teamIndex);
+    const badge = teamsZone.querySelector(`[data-pending-badge="${teamIndex}"]`);
+    const total = pendingTotal(teamIndex);
+    if (badge) badge.textContent = total > 0 ? ` (${total})` : '';
+    const autoLabel = entryOverlay.querySelector(`[data-auto-complement-label="${teamIndex}"]`);
+    if (autoLabel) autoLabel.textContent = autoComplementLabel(teamIndex);
+  }
+
+  function appendDigit(teamIndex, digit) {
+    const current = pendingBase[teamIndex];
+    const nextStr = (current === 0 ? '' : String(current)) + digit;
+    if (nextStr.length > 3) return; // cap at 999, the 157-point pool never exceeds this
+    pendingBase[teamIndex] = parseInt(nextStr, 10);
+    updatePointsDisplay(teamIndex);
+  }
+
+  // Each tap cycles the count for that announce: 0 → 1 → … → its max (see
+  // ANNONCES) → back to 0. This both lets a wrong tap be corrected (keep
+  // tapping back to 0 — the only "undo" announces have, since they don't go
+  // through the keypad's backspace) and lets a repeatable announce (a run,
+  // held by either partner) be declared twice in the same hand.
+  function cycleAnnonce(teamIndex, key) {
+    const max = ANNONCES.find((a) => a.key === key).max;
+    const current = pendingAnnonceActive[teamIndex][key] || 0;
+    const next = current >= max ? 0 : current + 1;
+    if (next === 0) delete pendingAnnonceActive[teamIndex][key];
+    else pendingAnnonceActive[teamIndex][key] = next;
+    updatePointsDisplay(teamIndex);
+    return next;
+  }
+
+  function backspaceDigit(teamIndex) {
+    pendingBase[teamIndex] = Math.floor(pendingBase[teamIndex] / 10);
+    updatePointsDisplay(teamIndex);
+  }
+
+  // A Jass hand is worth 157 points total (hors annonces): once one team's
+  // card points are known, the other team's are the complement to 157.
+  function commitPoints(teamIndex) {
+    const base = pendingBase[teamIndex];
+    const annonces = annonceTotal(teamIndex);
+    const points = base + annonces;
+    if (points <= 0) return;
     pushHistory();
+
     const team = state.teams[teamIndex];
     team.score += points;
     addPointsToTally(team.tally, points);
     addLog(teamLabel(team, 'Équipe ' + (teamIndex + 1)) + ' +' + points, points);
+
+    if (autoComplement && base > 0 && base < 157) {
+      const otherIndex = 1 - teamIndex;
+      const complement = 157 - base;
+      const otherTeam = state.teams[otherIndex];
+      otherTeam.score += complement;
+      addPointsToTally(otherTeam.tally, complement);
+      addLog(teamLabel(otherTeam, 'Équipe ' + (otherIndex + 1)) + ' +' + complement + ' (complément à 157)', complement);
+    }
+
+    pendingBase[teamIndex] = 0;
+    pendingAnnonceActive[teamIndex] = {};
     saveState();
     render();
   }
@@ -256,12 +426,16 @@ export default function initJass(container) {
     pushHistory();
     state.teams.forEach((t) => { t.score = 0; t.tally = emptyTally(); });
     state.log = [];
+    pendingBase = [0, 0];
+    pendingAnnonceActive = [{}, {}];
     saveState();
     render();
   });
   container.querySelector('#resetAllBtn').addEventListener('click', () => {
     maybeRecordGame();
     state = { teams: [TEAM_TEMPLATE(), TEAM_TEMPLATE()], log: [], history: [] };
+    pendingBase = [0, 0];
+    pendingAnnonceActive = [{}, {}];
     saveState();
     render();
   });
@@ -277,11 +451,104 @@ export default function initJass(container) {
       });
     });
 
-    const pointsInput = teamsZone.querySelector(`[data-points-input="${teamIndex}"]`);
-    const validateBtn = teamsZone.querySelector(`[data-validate="${teamIndex}"]`);
-    const commit = () => { applyTeamPoints(teamIndex, pointsInput); };
-    validateBtn.addEventListener('click', commit);
-    pointsInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); });
+    const openBtn = teamsZone.querySelector(`[data-open-entry="${teamIndex}"]`);
+    openBtn.addEventListener('click', () => openEntryModal(teamIndex));
+
+    updatePointsDisplay(teamIndex);
+  }
+
+  // The on-screen keypad/annonces live in a single shared modal (rather than
+  // inline in each team panel) so both team panels stay short enough to fit
+  // on screen together without scrolling.
+  function entryBodyHTML(teamIndex) {
+    return `
+      <div class="annonces-row">
+        <span class="annonces-label">Annonces</span>
+        ${ANNONCES.map((a) => {
+          const count = pendingAnnonceActive[teamIndex][a.key] || 0;
+          return `<button type="button" class="annonce-btn${count > 0 ? ' active' : ''}" data-annonce-key="${a.key}" title="${escapeAttr(a.title)}">${annonceButtonLabel(a, count)}</button>`;
+        }).join('')}
+      </div>
+      <div class="points-display-row">
+        <div class="points-display-wrap">
+          <span class="points-display-label">Points de plis</span>
+          <div class="points-display" data-points-display="${teamIndex}">${pendingBase[teamIndex]}</div>
+        </div>
+        <button type="button" class="backspace-btn" data-backspace="${teamIndex}" title="Effacer le dernier chiffre">⌫</button>
+      </div>
+      <div class="points-summary" data-points-summary="${teamIndex}">${summaryText(teamIndex)}</div>
+      <div class="keypad" data-keypad="${teamIndex}">
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" class="keypad-zero" data-key="0">0</button>
+        <button type="button" class="keypad-valider" data-validate="${teamIndex}">Valider</button>
+      </div>
+      <label class="auto-complement-row">
+        <input type="checkbox" id="autoComplementToggle" ${autoComplement ? 'checked' : ''}>
+        <span data-auto-complement-label="${teamIndex}">${autoComplementLabel(teamIndex)}</span>
+      </label>
+    `;
+  }
+
+  function wireEntryBody(teamIndex) {
+    entryOverlay.querySelectorAll(`[data-annonce-key]`).forEach((btn) => {
+      const key = btn.getAttribute('data-annonce-key');
+      const annonce = ANNONCES.find((a) => a.key === key);
+      btn.addEventListener('click', () => {
+        const count = cycleAnnonce(teamIndex, key);
+        btn.classList.toggle('active', count > 0);
+        btn.innerHTML = annonceButtonLabel(annonce, count);
+      });
+    });
+
+    const backspaceBtn = entryOverlay.querySelector(`[data-backspace="${teamIndex}"]`);
+    backspaceBtn.addEventListener('click', () => backspaceDigit(teamIndex));
+
+    entryOverlay.querySelectorAll(`[data-keypad="${teamIndex}"] [data-key]`).forEach((btn) => {
+      btn.addEventListener('click', () => appendDigit(teamIndex, btn.getAttribute('data-key')));
+    });
+
+    const validateBtn = entryOverlay.querySelector(`[data-validate="${teamIndex}"]`);
+    validateBtn.addEventListener('click', () => { commitPoints(teamIndex); closeEntryModal(); });
+
+    const autoComplementToggle = entryOverlay.querySelector('#autoComplementToggle');
+    autoComplementToggle.addEventListener('change', (e) => { autoComplement = e.target.checked; });
+  }
+
+  // The active team's tab is just a highlighted label; the other one doubles
+  // as the "switch team" control, so both teams can key in their round
+  // back-to-back without closing the popup in between.
+  function renderEntryTeamTabs(teamIndex) {
+    entryTeamTabs.innerHTML = [0, 1].map((i) => {
+      const label = teamLabel(state.teams[i], 'Équipe ' + (i + 1));
+      const isActive = i === teamIndex;
+      return `<button type="button" class="entry-team-tab${isActive ? ' active' : ''}" data-switch-to="${i}">${escapeAttr(label)}</button>`;
+    }).join('');
+    entryTeamTabs.querySelectorAll('[data-switch-to]').forEach((btn) => {
+      const target = parseInt(btn.getAttribute('data-switch-to'), 10);
+      if (target !== teamIndex) btn.addEventListener('click', () => openEntryModal(target));
+    });
+  }
+
+  function openEntryModal(teamIndex) {
+    activeEntryTeam = teamIndex;
+    renderEntryTeamTabs(teamIndex);
+    entryBody.innerHTML = entryBodyHTML(teamIndex);
+    wireEntryBody(teamIndex);
+    entryCard.classList.toggle('entry-card-mirrored', isMirrored(teamIndex));
+    entryOverlay.classList.remove('hidden');
+  }
+
+  function closeEntryModal() {
+    entryOverlay.classList.add('hidden');
+    activeEntryTeam = null;
   }
 
   function renderTeamPanel(team, i) {
@@ -293,10 +560,9 @@ export default function initJass(container) {
       </div>
       <div class="team-score">${team.score}</div>
       ${renderArdoise(team.tally)}
-      <div class="round-entry">
-        <input type="number" inputmode="numeric" min="0" placeholder="Points de la manche" data-points-input="${i}">
-        <button type="button" data-validate="${i}">Valider</button>
-      </div>
+      <button type="button" class="open-entry-btn" data-open-entry="${i}">
+        Saisir les points<span class="pending-badge" data-pending-badge="${i}"></span>
+      </button>
     `;
   }
 
