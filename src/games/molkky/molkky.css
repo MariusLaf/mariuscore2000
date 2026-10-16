@@ -14,7 +14,7 @@
   --red-soft: #F0DAD4;
   --line: #E0D3B4;
   --shadow: rgba(59, 46, 34, 0.12);
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* shared game-ui.css tokens */
   --ui-surface: var(--surface);
@@ -49,39 +49,6 @@
     radial-gradient(circle at 12% 8%, var(--surface-2) 0%, transparent 45%),
     radial-gradient(circle at 90% 85%, var(--surface-2) 0%, transparent 40%);
 }
-@media (prefers-color-scheme: dark) {
-  .game-molkky:not([data-theme="light"]) {
-    --bg: #221B12;
-    --surface: #2C2318;
-    --surface-2: #382C1D;
-    --ink: #F1E7D4;
-    --ink-soft: #B4A488;
-    --moss: #86A876;
-    --moss-ink: #1B2417;
-    --amber: #E0A855;
-    --amber-soft: #4A3A23;
-    --red: #DE8676;
-    --red-soft: #4A2C26;
-    --line: #4A3D28;
-    --shadow: rgba(0, 0, 0, 0.35);
-  }
-}
-.game-molkky[data-theme="dark"] {
-  --bg: #221B12;
-  --surface: #2C2318;
-  --surface-2: #382C1D;
-  --ink: #F1E7D4;
-  --ink-soft: #B4A488;
-  --moss: #86A876;
-  --moss-ink: #1B2417;
-  --amber: #E0A855;
-  --amber-soft: #4A3A23;
-  --red: #DE8676;
-  --red-soft: #4A2C26;
-  --line: #4A3D28;
-  --shadow: rgba(0, 0, 0, 0.35);
-}
-
 .game-molkky * { box-sizing: border-box; }
 
 .game-molkky .wrap {
@@ -90,18 +57,6 @@
   padding: 20px 18px 40px;
   min-height: 100%;
 }
-.game-molkky .theme-toggle {
-  background: none;
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-family: inherit;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
 .game-molkky .card {
   background: var(--surface);
   border: 1px solid var(--line);

@@ -10,7 +10,7 @@ const MARKUP = `
       <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler la dernière action">↩︎</button>
       <button class="icon-btn-sm" id="resetScoresBtn" title="Remettre les scores à zéro">🔄</button>
-      <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🗑</button>
+      <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🆕</button>
     </div>
   </div>
 

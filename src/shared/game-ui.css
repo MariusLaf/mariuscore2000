@@ -58,13 +58,11 @@
 /* ---- Scoreboard (one chip per player) ---- */
 .game-root .scoreboard {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
   padding: 2px 2px 12px;
   margin-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
 }
-.game-root .scoreboard::-webkit-scrollbar { display: none; }
 
 .game-root .chip {
   position: relative;

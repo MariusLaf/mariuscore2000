@@ -13,7 +13,7 @@
   --danger-soft: #F0DAD4;
   --success: #3F9142;
   --shadow: rgba(31, 41, 55, 0.12);
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* shared game-ui.css tokens */
   --ui-surface: var(--surface);
@@ -40,22 +40,6 @@
   color: var(--ink);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-@media (prefers-color-scheme: dark) {
-  .game-libre {
-    --bg: #14181F;
-    --surface: #1C222B;
-    --surface-2: #262D38;
-    --ink: #E6E9EF;
-    --ink-soft: #9AA4B2;
-    --accent: #6F9BF0;
-    --accent-ink: #10151D;
-    --line: #333C4A;
-    --danger: #DE8676;
-    --danger-soft: #4A2C26;
-    --success: #7BC47F;
-    --shadow: rgba(0, 0, 0, 0.35);
-  }
 }
 
 .game-libre * { box-sizing: border-box; }

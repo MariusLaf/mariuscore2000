@@ -10,9 +10,8 @@ const MARKUP = `
       <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm hidden" id="placementBtn" title="Placement de départ des quilles">📐</button>
       <button class="icon-btn-sm hidden" id="undoBtn" title="Annuler le dernier lancer">↩︎</button>
-      <button class="icon-btn-sm hidden" id="rematchBtn" title="Réinitialiser (mêmes joueurs)">🔁</button>
-      <button class="icon-btn-sm hidden" id="newGameBtn" title="Nouvelle partie">🆕</button>
-      <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">☾/☀</button>
+      <button class="icon-btn-sm hidden" id="rematchBtn" title="Remettre les scores à zéro">🔄</button>
+      <button class="icon-btn-sm hidden danger" id="newGameBtn" title="Tout réinitialiser">🆕</button>
     </div>
   </div>
 
@@ -100,7 +99,6 @@ export default function initMolkky(container) {
   container.innerHTML = MARKUP;
 
   const STORAGE_KEY = 'molkky-state-v1';
-  const THEME_KEY = 'molkky-theme';
   const GAMES_HISTORY_KEY = 'molkky-games-history-v1';
   const gamesHistory = createGamesHistory({
     container,
@@ -108,18 +106,19 @@ export default function initMolkky(container) {
     storageKey: GAMES_HISTORY_KEY
   });
 
-  let state = loadState() || freshState();
-  let history = []; // stack of state snapshots for undo
-
   function freshState() {
     return {
       phase: 'playing', // playing | won
       players: [],   // {name, score, misses}
       currentIndex: 0,
       winnerIndex: null,
-      log: [] // {playerName, label, points}
+      log: [], // {playerName, label, points}
+      history: [] // stack of JSON-stringified snapshots for undo
     };
   }
+
+  let state = loadState() || freshState();
+  if (!Array.isArray(state.history)) state.history = [];
 
   function saveState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -131,31 +130,12 @@ export default function initMolkky(container) {
     } catch (e) { return null; }
   }
   function pushHistory() {
-    history.push(JSON.parse(JSON.stringify(state)));
-    if (history.length > 100) history.shift();
+    state.history.push(JSON.stringify({
+      phase: state.phase, players: state.players, currentIndex: state.currentIndex,
+      winnerIndex: state.winnerIndex, log: state.log
+    }));
+    if (state.history.length > 30) state.history.shift();
   }
-
-  // ---------- THEME ----------
-  const themeToggle = container.querySelector('#themeToggle');
-  function applyTheme(t) {
-    if (t) container.setAttribute('data-theme', t);
-    else container.removeAttribute('data-theme');
-  }
-  (function initTheme() {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved) applyTheme(saved);
-    } catch (e) {}
-  })();
-  themeToggle.addEventListener('click', () => {
-    const current = container.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : (current === 'light' ? null : 'dark');
-    applyTheme(next);
-    try {
-      if (next) localStorage.setItem(THEME_KEY, next);
-      else localStorage.removeItem(THEME_KEY);
-    } catch (e) {}
-  });
 
   // ---------- GAME SCREEN ----------
   const scoreboard = container.querySelector('#scoreboard');
@@ -226,8 +206,9 @@ export default function initMolkky(container) {
   }
 
   undoBtn.addEventListener('click', () => {
-    if (history.length === 0) return;
-    state = history.pop();
+    if (state.history.length === 0) return;
+    const prev = JSON.parse(state.history.pop());
+    Object.assign(state, prev);
     saveState();
     render();
   });
@@ -250,7 +231,6 @@ export default function initMolkky(container) {
   function resetToSetup() {
     maybeRecordUnfinishedGame();
     state = freshState();
-    history = [];
     saveState();
     render();
   }
@@ -262,7 +242,7 @@ export default function initMolkky(container) {
     state.phase = 'playing';
     state.winnerIndex = null;
     state.log = [];
-    history = [];
+    state.history = [];
     saveState();
     render();
   }
@@ -377,7 +357,7 @@ export default function initMolkky(container) {
 
     playerBoard.render();
 
-    undoBtn.style.opacity = history.length === 0 ? '0.5' : '1';
+    undoBtn.style.opacity = state.history.length === 0 ? '0.5' : '1';
 
     logEl.innerHTML = '';
     [...state.log].reverse().forEach(entry => {

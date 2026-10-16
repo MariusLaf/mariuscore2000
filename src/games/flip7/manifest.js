@@ -8,7 +8,7 @@ let fontEl = null;
 export default {
   id: 'flip7',
   name: 'Flip 7',
-  icon: '🃏',
+  icon: '🎴',
   description: "Compteur de points pour le jeu de cartes Flip 7 (objectif 200).",
   themeColor: '#2aa3a6',
 

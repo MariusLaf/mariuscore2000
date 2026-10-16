@@ -14,8 +14,8 @@ const MARKUP = `
       <button class="icon-btn-sm" id="gamesHistoryBtn" title="Historique des parties">🕓</button>
       <button class="icon-btn-sm" id="rulesBtn" title="Règles du compteur">ℹ️</button>
       <button class="icon-btn-sm" id="undoBtn" title="Annuler la dernière manche">↩︎</button>
-      <button class="icon-btn-sm" id="resetBtn" title="Nouvelle partie">🔄</button>
-      <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🗑</button>
+      <button class="icon-btn-sm" id="resetBtn" title="Remettre les scores à zéro">🔄</button>
+      <button class="icon-btn-sm danger" id="resetAllBtn" title="Tout réinitialiser">🆕</button>
     </div>
   </div>
 

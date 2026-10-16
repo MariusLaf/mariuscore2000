@@ -53,7 +53,6 @@
 
 .game-flip7 .brand h1{ color: var(--cream); }
 
-.game-flip7 .scoreboard{ flex-wrap: wrap; overflow-x: visible; }
 .game-flip7 .scoreboard .chip{
   flex: 1 1 var(--ui-chip-min-width);
   touch-action: manipulation;
