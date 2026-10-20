@@ -18,6 +18,23 @@ function parseRoute() {
   return { name: 'home' };
 }
 
+// Keep the screen awake while a game is open (scoreboards sit idle between rounds).
+let wakeLock = null;
+async function setWakeLock(on) {
+  try {
+    if (!on) {
+      if (wakeLock) await wakeLock.release();
+      wakeLock = null;
+    } else if ('wakeLock' in navigator && !wakeLock) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* unsupported or denied: ignore */ }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && activeGame) setWakeLock(true);
+});
+
 function goHome() {
   window.location.hash = '#/';
 }
@@ -29,6 +46,7 @@ async function render() {
   activeGame = null;
   activeGameContainer = null;
   root.innerHTML = '';
+  setWakeLock(false);
 
   const route = parseRoute();
 
@@ -64,6 +82,7 @@ async function render() {
   root.appendChild(gameContainer);
 
   activeGame = manifest;
+  setWakeLock(true);
   activeGameContainer = gameContainer;
 
   await manifest.mount(gameContainer);

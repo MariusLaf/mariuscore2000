@@ -249,6 +249,9 @@ export default function initJass(container) {
   let autoComplement = true;
   let manualFlip = [false, false];
   let activeEntryTeam = null;
+  // Orientation of the entry card, fixed when it is opened from a team panel
+  // so that switching team tabs never flips the view.
+  let entryMirrored = false;
 
   function annonceTotal(teamIndex) {
     return ANNONCES.reduce((sum, a) => sum + (pendingAnnonceActive[teamIndex][a.key] || 0) * a.value, 0);
@@ -291,7 +294,8 @@ export default function initJass(container) {
   entryFlip.addEventListener('click', () => {
     if (activeEntryTeam === null) return;
     manualFlip[activeEntryTeam] = !manualFlip[activeEntryTeam];
-    entryCard.classList.toggle('entry-card-mirrored', isMirrored(activeEntryTeam));
+    entryMirrored = !entryMirrored;
+    entryCard.classList.toggle('entry-card-mirrored', entryMirrored);
   });
 
   const gamesHistory = createGamesHistory({
@@ -533,16 +537,17 @@ export default function initJass(container) {
     }).join('');
     entryTeamTabs.querySelectorAll('[data-switch-to]').forEach((btn) => {
       const target = parseInt(btn.getAttribute('data-switch-to'), 10);
-      if (target !== teamIndex) btn.addEventListener('click', () => openEntryModal(target));
+      if (target !== teamIndex) btn.addEventListener('click', () => openEntryModal(target, true));
     });
   }
 
-  function openEntryModal(teamIndex) {
+  function openEntryModal(teamIndex, keepOrientation) {
     activeEntryTeam = teamIndex;
+    if (!keepOrientation) entryMirrored = isMirrored(teamIndex);
     renderEntryTeamTabs(teamIndex);
     entryBody.innerHTML = entryBodyHTML(teamIndex);
     wireEntryBody(teamIndex);
-    entryCard.classList.toggle('entry-card-mirrored', isMirrored(teamIndex));
+    entryCard.classList.toggle('entry-card-mirrored', entryMirrored);
     entryOverlay.classList.remove('hidden');
   }
 
