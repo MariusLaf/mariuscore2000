@@ -34,7 +34,9 @@ async function render() {
 
   if (route.name === 'home') {
     document.title = 'MariuScore2000';
-    renderHome(root, games, (gameId) => {
+    // Un jeu en bêta (manifest.beta) reste jouable via son lien direct #/game/<id>
+    // mais n'apparaît pas sur la grille publique.
+    renderHome(root, games.filter((g) => !g.beta), (gameId) => {
       window.location.hash = `#/game/${gameId}`;
     });
     return;

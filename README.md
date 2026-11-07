@@ -25,6 +25,7 @@ npm run preview
 1. Créer un dossier sous `src/games/<id>/`.
 2. Y ajouter un `manifest.js` exportant `{ id, name, icon, description, themeColor, mount(container), unmount() }`.
 3. Le jeu apparaît automatiquement sur l'écran d'accueil — rien d'autre à modifier.
+4. Pour tester un jeu en bêta sans l'exposer publiquement, ajouter `beta: true` au manifest : il reste accessible via son lien direct `#/game/<id>` mais disparaît de la grille d'accueil (voir `src/shell/app.js`).
 
 Convention de stockage : chaque jeu utilise sa propre clé `localStorage` préfixée par son `id` (ex. `<id>-state-v1`), et garde si possible une forme minimale commune (`players: [{ name, score }]`, `log: [...]`) pour faciliter une éventuelle vue d'ensemble multi-jeux plus tard.
 
