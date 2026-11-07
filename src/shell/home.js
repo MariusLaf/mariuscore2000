@@ -5,10 +5,34 @@ export function renderHome(root, games, onSelect) {
   const header = document.createElement('header');
   header.className = 'home-header';
   header.innerHTML = `
-    <h1>MariuScore2000</h1>
+    <div class="home-header-top">
+      <h1>MariuScore2000</h1>
+      <button type="button" class="feedback-btn" id="feedbackBtn" title="Suggérer un jeu ou signaler un bug">💡</button>
+    </div>
     <p>Choisis un jeu pour commencer à compter les points.</p>
   `;
   wrap.appendChild(header);
+
+  const feedbackOverlay = document.createElement('div');
+  feedbackOverlay.className = 'feedback-overlay hidden';
+  feedbackOverlay.innerHTML = `
+    <div class="feedback-card">
+      <p>Un bug ou une idée de nouveau compteur de points ?<br>Hésite pas à me demander.</p>
+      <p class="feedback-signature">Marius Laforge</p>
+      <button type="button" class="feedback-close">Fermer</button>
+    </div>
+  `;
+  wrap.appendChild(feedbackOverlay);
+
+  header.querySelector('#feedbackBtn').addEventListener('click', () => {
+    feedbackOverlay.classList.remove('hidden');
+  });
+  feedbackOverlay.querySelector('.feedback-close').addEventListener('click', () => {
+    feedbackOverlay.classList.add('hidden');
+  });
+  feedbackOverlay.addEventListener('click', (e) => {
+    if (e.target === feedbackOverlay) feedbackOverlay.classList.add('hidden');
+  });
 
   const grid = document.createElement('div');
   grid.className = 'home-grid';
