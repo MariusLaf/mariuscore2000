@@ -216,6 +216,7 @@ export default function initFlip7(container) {
     }
     saveState();
     render();
+    showRanking();
   }
 
   function bestAtOrAboveTarget() {
