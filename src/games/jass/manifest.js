@@ -8,7 +8,7 @@ let fontEl = null;
 export default {
   id: 'jass',
   name: 'Jass',
-  icon: '🃏',
+  icon: '<svg viewBox="0 0 28 38" width="1.5em" height="1.5em" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="35" rx="4" fill="#2E4A3A" stroke="#EDEAE0" stroke-width="2"/><text x="14" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="19" fill="#EDEAE0">Z</text></svg>',
   description: "Compteur de Jass à l'ardoise, avec l'affichage traditionnel en Z.",
   themeColor: '#2E4A3A',
 
