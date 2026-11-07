@@ -57,7 +57,7 @@ Tout jeu utilise `createGamesHistory` et enregistre une partie terminée à *cha
 ## Icône du jeu (manifest.icon)
 
 - Si un emoji natif représente sans ambiguïté le matériel du jeu, l'utiliser tel quel (ex. dés 🎲, quilles 🎳, abaque 🧮).
-- Sinon — notamment pour les jeux de cartes, où les emoji génériques 🃏/🎴 ne distinguent rien et se répètent d'un jeu à l'autre — dessiner une mini carte en SVG inline représentative du jeu plutôt que de reprendre un emoji générique. Voir `src/games/flip7/manifest.js` et `src/games/skyjo/manifest.js` : fond uni, bordure et texte dans une seule couleur sobre tirée du thème du jeu, `viewBox="0 0 28 38"` (proportions d'une carte à jouer), sans dégradé ni ombre, dimensionnée en `em` (`width`/`height`) pour suivre la taille des icônes emoji voisines sur l'écran d'accueil.
+- Sinon — notamment pour les jeux de cartes, où les emoji génériques 🃏/🎴 ne distinguent rien et se répètent d'un jeu à l'autre — dessiner un petit pictogramme en SVG inline représentatif du jeu plutôt que de reprendre un emoji générique : soit une mini carte avec son chiffre/couleur emblématique (`src/games/flip7/manifest.js`, `src/games/skyjo/manifest.js`), soit un objet réel du jeu (`src/games/jass/manifest.js` : une ardoise à craie). `viewBox="0 0 28 38"` (proportions d'une carte à jouer) sauf si la forme réelle du matériel l'impose autrement, 2-3 couleurs maximum tirées du thème du jeu ou du matériel réel, sans dégradé ni ombre, dimensionné en `em` (`width`/`height`) pour suivre la taille des icônes emoji voisines sur l'écran d'accueil.
 - Ne jamais réutiliser la même icône (emoji ou forme) pour deux jeux différents.
 
 ## Contrat technique (manifest)
