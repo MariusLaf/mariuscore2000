@@ -54,6 +54,12 @@ Tout jeu utilise `createGamesHistory` et enregistre une partie terminée à *cha
   }
   ```
 
+## Icône du jeu (manifest.icon)
+
+- Si un emoji natif représente sans ambiguïté le matériel du jeu, l'utiliser tel quel (ex. dés 🎲, quilles 🎳, abaque 🧮).
+- Sinon — notamment pour les jeux de cartes, où les emoji génériques 🃏/🎴 ne distinguent rien et se répètent d'un jeu à l'autre — dessiner une mini carte en SVG inline représentative du jeu plutôt que de reprendre un emoji générique. Voir `src/games/flip7/manifest.js` et `src/games/skyjo/manifest.js` : fond uni, bordure et texte dans une seule couleur sobre tirée du thème du jeu, `viewBox="0 0 28 38"` (proportions d'une carte à jouer), sans dégradé ni ombre, dimensionnée en `em` (`width`/`height`) pour suivre la taille des icônes emoji voisines sur l'écran d'accueil.
+- Ne jamais réutiliser la même icône (emoji ou forme) pour deux jeux différents.
+
 ## Contrat technique (manifest)
 
 Voir le [README](README.md#ajouter-un-nouveau-jeu) pour la forme exacte du `manifest.js`. En résumé : `mount(container)` injecte son propre CSS/police puis délègue à son module de logique ; `unmount()` retire ce qu'il a injecté. Rien d'autre ne doit fuiter hors du conteneur du jeu (pas de style sur `body`/`:root`, tout est scopé sous `.game-<id>` pour le thème et `.game-root` pour la disposition partagée).
